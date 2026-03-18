@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { MediaItem, MediaItemUpdate } from "../../types/media";
 import { updateItem, deleteItem } from "../../lib/media";
+import { CallDetailView } from "../audio/CallDetailView";
 import styles from "./TimelineItem.module.css";
 
 interface TimelineItemProps {
@@ -88,6 +89,13 @@ export function TimelineItem({ item, onUpdate }: TimelineItemProps) {
         <span className={styles.title}>
           {item.title || item.file_name}
         </span>
+        {isAudio && item.processing_status !== "completed" && (
+          <span className={`${styles.statusBadge} ${styles[`status_${item.processing_status}`]}`}>
+            {item.processing_status === "processing" ? "Transcribing..." :
+             item.processing_status === "pending" ? "Queued" :
+             item.processing_status === "failed" ? "Failed" : ""}
+          </span>
+        )}
         <span className={styles.size}>{formatSize(item.file_size)}</span>
         <button
           className={styles.deleteBtn}
@@ -112,9 +120,7 @@ export function TimelineItem({ item, onUpdate }: TimelineItemProps) {
             />
           )}
           {isAudio && (
-            <audio controls className={styles.audioPlayer} preload="metadata">
-              <source src={item.file_url} type={item.mime_type} />
-            </audio>
+            <CallDetailView item={item} onUpdate={onUpdate} />
           )}
           {isVideo && (
             <video controls className={styles.videoPlayer} preload="metadata">

@@ -15,6 +15,13 @@ class Settings(BaseSettings):
 
     UPLOAD_DIR: str = "/app/uploads"
 
+    # Whisper transcription
+    WHISPER_MODEL_DIR: str = "/models"
+    WHISPER_DEFAULT_MODEL: str = "base"
+    WHISPER_DEVICE: str = "auto"  # "auto", "cuda", "cpu"
+    WHISPER_COMPUTE_TYPE: str = "auto"  # "auto", "int8", "float16", "float32"
+    TRANSCRIPTION_CONCURRENCY: int = 1
+
     @property
     def database_url(self) -> str:
         return (

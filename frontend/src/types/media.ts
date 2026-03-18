@@ -38,6 +38,32 @@ export interface MediaItemUpdate {
   platform?: string | null;
 }
 
+export interface TranscriptSegment {
+  id: string;
+  start_time: number;
+  end_time: number;
+  text: string;
+  segment_index: number;
+}
+
+export interface Transcript {
+  id: string;
+  media_item_id: string;
+  full_text: string;
+  language: string | null;
+  segments: TranscriptSegment[];
+  created_at: string;
+}
+
+export interface TranscriptionStatus {
+  status: "pending" | "transcribing" | "completed" | "failed" | "not_found";
+  progress: number;
+  item_id: string;
+  segments_done?: number;
+  error?: string;
+  result?: Record<string, unknown>;
+}
+
 export interface UploadingFile {
   id: string;
   file: File;

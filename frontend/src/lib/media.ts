@@ -1,4 +1,4 @@
-import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate } from "../types/media";
+import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript } from "../types/media";
 import { apiFetch } from "./api";
 
 export async function uploadFile(
@@ -7,12 +7,16 @@ export async function uploadFile(
   contentType: ContentType,
   timestamp?: string,
   onProgress?: (progress: number) => void,
+  whisperModel?: string,
 ): Promise<MediaItem> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("content_type", contentType);
   if (timestamp) {
     formData.append("item_timestamp", timestamp);
+  }
+  if (whisperModel) {
+    formData.append("whisper_model", whisperModel);
   }
 
   return new Promise((resolve, reject) => {
@@ -69,4 +73,15 @@ export function updateItem(itemId: string, data: MediaItemUpdate): Promise<Media
 
 export function deleteItem(itemId: string): Promise<void> {
   return apiFetch<void>(`/items/${itemId}`, { method: "DELETE" });
+}
+
+export function getTranscript(itemId: string): Promise<Transcript> {
+  return apiFetch<Transcript>(`/items/${itemId}/transcript`);
+}
+
+export function retranscribe(itemId: string, whisperModel?: string): Promise<MediaItem> {
+  const params = whisperModel ? `?whisper_model=${whisperModel}` : "";
+  return apiFetch<MediaItem>(`/items/${itemId}/transcribe${params}`, {
+    method: "POST",
+  });
 }

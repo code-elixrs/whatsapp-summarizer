@@ -92,6 +92,35 @@
   text-overflow: ellipsis;
 }
 
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.status_pending {
+  background: var(--orange-muted);
+  color: var(--orange);
+}
+
+.status_processing {
+  background: var(--blue-muted);
+  color: var(--blue);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status_failed {
+  background: var(--red-muted);
+  color: var(--red);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .size {
   font-size: 11px;
   color: var(--text-muted);

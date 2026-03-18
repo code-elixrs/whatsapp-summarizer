@@ -1,3 +1,4 @@
+import logging
 import mimetypes
 import uuid
 from datetime import datetime
@@ -6,21 +7,27 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from fastapi.responses import FileResponse
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
 from app.core.storage import delete_file, generate_file_path, get_absolute_path, save_upload
 from app.models.media_item import ContentType, MediaItem, ProcessingStatus, TimestampSource
 from app.models.space import Space
+from app.models.transcript import Transcript, TranscriptSegment
 from app.schemas.media_item import (
     MediaItemListResponse,
     MediaItemResponse,
     MediaItemUpdate,
 )
+from app.schemas.transcript import TranscriptResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["items"])
 
 ALLOWED_MIME_PREFIXES = ("image/", "audio/", "video/")
 MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
+VALID_WHISPER_MODELS = ("tiny", "base", "small", "medium", "large-v3")
 
 
 def _item_to_response(item: MediaItem) -> MediaItemResponse:
@@ -58,6 +65,7 @@ async def upload_file(
     platform: str | None = Form(default=None),
     group_id: uuid.UUID | None = Form(default=None),
     group_order: int | None = Form(default=None),
+    whisper_model: str | None = Form(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     space = await db.get(Space, space_id)
@@ -71,12 +79,20 @@ async def upload_file(
     if not any(mime.startswith(prefix) for prefix in ALLOWED_MIME_PREFIXES):
         raise HTTPException(status_code=400, detail=f"Unsupported file type: {mime}")
 
+    if whisper_model and whisper_model not in VALID_WHISPER_MODELS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid whisper model. Choose from: {', '.join(VALID_WHISPER_MODELS)}",
+        )
+
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large (max 500MB)")
 
     relative_path, absolute_path = generate_file_path(space_id, file.filename)
     await save_upload(content, absolute_path)
+
+    is_audio = mime.startswith("audio/")
 
     item = MediaItem(
         space_id=space_id,
@@ -89,7 +105,7 @@ async def upload_file(
         mime_type=mime,
         item_timestamp=item_timestamp,
         timestamp_source=TimestampSource.USER_PROVIDED if item_timestamp else TimestampSource.USER_PROVIDED,
-        processing_status=ProcessingStatus.COMPLETED,
+        processing_status=ProcessingStatus.PENDING if is_audio else ProcessingStatus.COMPLETED,
         group_id=group_id,
         group_order=group_order,
         platform=platform,
@@ -97,6 +113,13 @@ async def upload_file(
     db.add(item)
     await db.commit()
     await db.refresh(item)
+
+    # Trigger async transcription for audio files
+    if is_audio:
+        from app.tasks.transcribe import transcribe_audio
+        task = transcribe_audio.delay(str(item.id), whisper_model)
+        logger.info("Queued transcription task %s for item %s", task.id, item.id)
+
     return _item_to_response(item)
 
 
@@ -190,3 +213,65 @@ async def serve_file(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
         media_type=item.mime_type,
         filename=item.file_name,
     )
+
+
+@router.get("/items/{item_id}/transcript", response_model=TranscriptResponse)
+async def get_transcript(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    item = await db.get(MediaItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    result = await db.execute(
+        select(Transcript)
+        .where(Transcript.media_item_id == item_id)
+        .options(selectinload(Transcript.segments))
+    )
+    transcript = result.scalar_one_or_none()
+    if not transcript:
+        raise HTTPException(status_code=404, detail="No transcript found for this item")
+
+    return TranscriptResponse.from_model(transcript)
+
+
+@router.post("/items/{item_id}/transcribe", response_model=MediaItemResponse)
+async def retranscribe_item(
+    item_id: uuid.UUID,
+    whisper_model: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+):
+    """Re-trigger transcription for an audio item (e.g., with a different model)."""
+    item = await db.get(MediaItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    if not item.mime_type.startswith("audio/"):
+        raise HTTPException(status_code=400, detail="Only audio items can be transcribed")
+
+    if whisper_model and whisper_model not in VALID_WHISPER_MODELS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid whisper model. Choose from: {', '.join(VALID_WHISPER_MODELS)}",
+        )
+
+    item.processing_status = ProcessingStatus.PENDING
+    await db.commit()
+    await db.refresh(item)
+
+    from app.tasks.transcribe import transcribe_audio
+    task = transcribe_audio.delay(str(item.id), whisper_model)
+    logger.info("Queued re-transcription task %s for item %s", task.id, item.id)
+
+    return _item_to_response(item)
+
+
+@router.get("/items/{item_id}/transcription-status")
+async def get_transcription_status(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Get the current transcription task status for an item."""
+    item = await db.get(MediaItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return {
+        "item_id": str(item.id),
+        "processing_status": item.processing_status.value,
+    }

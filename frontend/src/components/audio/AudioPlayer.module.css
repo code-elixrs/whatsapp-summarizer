@@ -1,0 +1,82 @@
+.player {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.waveform {
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.playBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.playBtn:hover {
+  background: var(--accent-hover);
+}
+
+.controlBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.controlBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.timeDisplay {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.rateBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 40px;
+  transition: all var(--transition-fast);
+}
+
+.rateBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}

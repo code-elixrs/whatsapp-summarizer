@@ -1,0 +1,232 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Waveform Player */
+.playerSection {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.waveform {
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.playBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-glow);
+}
+
+.playBtn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.controlBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.controlBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.timeDisplay {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+.rateBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 40px;
+  transition: all var(--transition-fast);
+}
+
+.rateBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+/* Progress */
+.progressSection {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.progressLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.progressPercent {
+  font-size: 13px;
+  color: var(--accent-hover);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.progressBar {
+  height: 4px;
+  background: var(--surface);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: var(--radius-full);
+  transition: width 300ms ease;
+}
+
+.progressMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  display: block;
+}
+
+/* Failed */
+.failedSection {
+  background: var(--red-muted);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--red);
+}
+
+.retryBtn {
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.retryBtn:hover {
+  opacity: 0.9;
+}
+
+/* Transcript section */
+.transcriptSection {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+/* Retranscribe */
+.retranscribeSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.modelSelect {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-2);
+  font-size: 12px;
+  color-scheme: dark;
+}
+
+.modelSelect:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.retranscribeBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  transition: all var(--transition-fast);
+}
+
+.retranscribeBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+/* States */
+.loadingText {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: var(--space-4);
+}
+
+.noTranscript {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+}

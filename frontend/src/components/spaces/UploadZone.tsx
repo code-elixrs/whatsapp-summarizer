@@ -18,6 +18,7 @@ const CONTENT_TYPES: { value: ContentType; label: string }[] = [
 export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
   const [dragOver, setDragOver] = useState(false);
   const [selectedType, setSelectedType] = useState<ContentType>("other_media");
+  const [whisperModel, setWhisperModel] = useState("base");
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,7 +45,8 @@ export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
             setFiles((prev) =>
               prev.map((f) => (f.id === uf.id ? { ...f, progress } : f))
             );
-          }
+          },
+          uf.contentType === "call_recording" ? whisperModel : undefined,
         )
           .then(() => {
             setFiles((prev) =>
@@ -65,7 +67,7 @@ export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
           });
       });
     },
-    [spaceId, selectedType, onUploadComplete]
+    [spaceId, selectedType, whisperModel, onUploadComplete]
   );
 
   const handleDrop = useCallback(
@@ -96,6 +98,23 @@ export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
           </button>
         ))}
       </div>
+
+      {selectedType === "call_recording" && (
+        <div className={styles.modelSelector}>
+          <label className={styles.modelLabel}>Whisper Model:</label>
+          <select
+            className={styles.modelSelect}
+            value={whisperModel}
+            onChange={(e) => setWhisperModel(e.target.value)}
+          >
+            <option value="tiny">Tiny (fastest)</option>
+            <option value="base">Base (default)</option>
+            <option value="small">Small (better accuracy)</option>
+            <option value="medium">Medium (best for CPU)</option>
+            <option value="large-v3">Large v3 (requires GPU)</option>
+          </select>
+        </div>
+      )}
 
       <div
         className={`${styles.dropZone} ${dragOver ? styles.dropZoneActive : ""}`}

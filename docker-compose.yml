@@ -41,13 +41,19 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # TODO: Extract transcription into a dedicated service for better scaling.
+  # To do so: (1) Create a separate Dockerfile with faster-whisper deps,
+  # (2) Add a new service in docker-compose with its own concurrency config,
+  # (3) Route transcription tasks to a dedicated Celery queue (-Q transcription),
+  # (4) Keep the celery worker here for non-ML tasks only.
   celery:
     build: ./backend
     env_file: .env
-    command: celery -A app.tasks.celery_app worker --loglevel=info
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=${TRANSCRIPTION_CONCURRENCY:-1}
     volumes:
       - ./backend:/app
       - uploads:/app/uploads
+      - whisper-models:/models
     depends_on:
       db:
         condition: service_healthy
@@ -71,3 +77,4 @@ volumes:
   pgdata:
   redisdata:
   uploads:
+  whisper-models:
