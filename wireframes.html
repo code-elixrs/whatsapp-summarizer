@@ -1,0 +1,2696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLog — UX Wireframes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg: #09090b;
+            --surface: rgba(24, 24, 27, 0.8);
+            --surface-solid: #18181b;
+            --surface2: rgba(39, 39, 42, 0.6);
+            --surface3: #27272a;
+            --border: rgba(63, 63, 70, 0.5);
+            --border-hover: rgba(113, 113, 122, 0.5);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #7c3aed;
+            --accent-light: #a78bfa;
+            --accent-glow: rgba(124, 58, 237, 0.15);
+            --accent-glow-strong: rgba(124, 58, 237, 0.3);
+            --green: #34d399;
+            --green-bg: rgba(52, 211, 153, 0.1);
+            --blue: #60a5fa;
+            --blue-bg: rgba(96, 165, 250, 0.1);
+            --orange: #fb923c;
+            --orange-bg: rgba(251, 146, 60, 0.1);
+            --pink: #f472b6;
+            --pink-bg: rgba(244, 114, 182, 0.1);
+            --yellow: #fbbf24;
+            --yellow-bg: rgba(251, 191, 36, 0.08);
+            --red: #f87171;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+            --shadow-glow: 0 0 40px rgba(124, 58, 237, 0.1);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ============ NAVIGATION ============ */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            gap: 6px;
+            z-index: 1000;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-right: 16px;
+            background: linear-gradient(135deg, var(--accent-light), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.3px;
+        }
+
+        .nav .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-left: 12px;
+            margin-right: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+        }
+
+        .nav button {
+            padding: 6px 12px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .nav button:hover {
+            background: var(--surface2);
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+
+        .nav button.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 0 16px rgba(124, 58, 237, 0.3);
+        }
+
+        /* ============ SCREENS ============ */
+        .screen {
+            display: none;
+            padding: 88px 32px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: screenIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .screen.active { display: block; }
+
+        @keyframes screenIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .screen-desc {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 14px;
+            font-weight: 400;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* ============ SHARED COMPONENTS ============ */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all var(--transition-base);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 24px rgba(124, 58, 237, 0.35);
+        }
+
+        .btn-primary:hover::before { opacity: 1; }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            width: 100%;
+            max-width: 400px;
+            transition: all var(--transition-base);
+            backdrop-filter: blur(8px);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-md);
+            background: rgba(39, 39, 42, 0.8);
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .search-icon { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
+
+        .back-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+            backdrop-filter: blur(8px);
+        }
+
+        .back-btn:hover {
+            background: var(--surface3);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-chip:hover {
+            border-color: var(--border-hover);
+            color: var(--text-secondary);
+            background: var(--surface2);
+        }
+
+        .filter-chip.active {
+            border-color: var(--accent);
+            color: var(--accent-light);
+            background: var(--accent-glow);
+        }
+
+        .view-toggle {
+            display: flex;
+            background: var(--surface2);
+            border-radius: var(--radius-md);
+            padding: 3px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+        }
+
+        .view-toggle-btn {
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 7px;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .view-toggle-btn:hover { color: var(--text-secondary); }
+
+        .view-toggle-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+        }
+
+        .item-type-badge {
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+
+        .badge-call { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(96, 165, 250, 0.15); }
+        .badge-chat { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.15); }
+        .badge-status { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(251, 191, 36, 0.12); }
+        .badge-media { background: var(--pink-bg); color: var(--pink); border: 1px solid rgba(244, 114, 182, 0.15); }
+
+        .item-action-btn {
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .item-action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-light);
+            background: var(--accent-glow);
+        }
+
+        .editable {
+            cursor: pointer;
+            border-bottom: 1px dashed var(--accent-light);
+            padding-bottom: 1px;
+            transition: color var(--transition-fast);
+        }
+
+        .editable:hover { color: var(--accent-light); }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin: 20px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-badge {
+            font-size: 10px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 100px;
+            background: var(--green-bg);
+            color: var(--green);
+            text-transform: none;
+            letter-spacing: 0;
+            border: 1px solid rgba(52, 211, 153, 0.15);
+        }
+
+        /* ============ SCREEN 1: SPACES LIST ============ */
+        .spaces-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .spaces-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .space-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .space-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            padding: 1px;
+            background: linear-gradient(135deg, transparent, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            transition: background var(--transition-base);
+            pointer-events: none;
+        }
+
+        .space-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            border-color: transparent;
+        }
+
+        .space-card:hover::before {
+            background: linear-gradient(135deg, var(--accent), var(--pink), var(--accent-light));
+        }
+
+        .space-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .space-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .space-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 16px;
+            background: inherit;
+            opacity: 0.25;
+            filter: blur(8px);
+            z-index: -1;
+        }
+
+        .space-name { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
+        .space-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .space-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .space-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .space-stat .count {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .space-card-new {
+            border-style: dashed;
+            border-color: var(--border);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            background: transparent;
+        }
+
+        .space-card-new:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .space-card-new::before { display: none; }
+
+        .space-card-new .plus-icon {
+            font-size: 28px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            transition: color var(--transition-fast);
+        }
+
+        .space-card-new:hover .plus-icon { color: var(--accent-light); }
+
+        /* ============ SCREEN 3: TIMELINE ============ */
+        .space-view-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 36px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--border) 30%, var(--border) 70%, transparent);
+            border-radius: 1px;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 28px 0 14px -36px;
+            padding-left: 36px;
+            position: relative;
+            letter-spacing: 0.3px;
+        }
+
+        .timeline-date::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+        }
+
+        .timeline-date::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-light);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translateY(-50%) scale(1); }
+            50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+        }
+
+        .timeline-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: all var(--transition-base);
+            backdrop-filter: blur(12px);
+        }
+
+        .timeline-item:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .timeline-item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .timeline-item-header:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .item-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 70px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .edit-time-btn {
+            font-size: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            opacity: 0;
+            transition: all var(--transition-fast);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .timeline-item-header:hover .edit-time-btn { opacity: 1; }
+        .edit-time-btn:hover { color: var(--accent-light); background: var(--accent-glow); }
+
+        .item-title {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+            color: var(--text-secondary);
+        }
+
+        .item-actions { display: flex; gap: 6px; }
+
+        /* Expandable content */
+        .item-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .item-content.show {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .item-content-inner {
+            padding: 0 16px 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Audio player */
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-top: 12px;
+            backdrop-filter: blur(8px);
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            flex-shrink: 0;
+            transition: all var(--transition-fast);
+            box-shadow: 0 0 16px rgba(124, 58, 237, 0.3);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 24px rgba(124, 58, 237, 0.5);
+        }
+
+        .waveform {
+            flex: 1;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            position: relative;
+        }
+
+        .waveform-bar {
+            width: 3px;
+            border-radius: 2px;
+            background: var(--surface3);
+            transition: background var(--transition-fast);
+        }
+
+        .waveform-bar.played {
+            background: var(--accent-light);
+        }
+
+        .audio-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        /* Transcript */
+        .transcript-preview {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-top: 12px;
+            max-height: 160px;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+        }
+
+        .transcript-line { margin-bottom: 4px; }
+
+        .transcript-time {
+            color: var(--accent-light);
+            font-size: 11px;
+            margin-right: 8px;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        /* Chat bubbles */
+        .chat-reconstruction {
+            margin-top: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(24, 24, 27, 0.9), rgba(15, 15, 20, 0.9));
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .chat-bubble {
+            max-width: 72%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            position: relative;
+            line-height: 1.45;
+            animation: bubbleIn 0.3s ease;
+        }
+
+        @keyframes bubbleIn {
+            from { opacity: 0; transform: translateY(6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .chat-bubble.sent {
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
+        }
+
+        .chat-bubble.received {
+            background: var(--surface3);
+            color: var(--text);
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
+        }
+
+        .chat-bubble .bubble-time {
+            font-size: 10px;
+            opacity: 0.5;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .chat-bubble .bubble-sender {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--green);
+            margin-bottom: 2px;
+        }
+
+        /* Stitch views */
+        .stitch-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            background: var(--surface2);
+            border-radius: var(--radius-md);
+            padding: 3px;
+            border: 1px solid var(--border);
+            width: fit-content;
+        }
+
+        .stitch-tab {
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 7px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .stitch-tab:hover { color: var(--text-secondary); }
+
+        .stitch-tab.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+        }
+
+        .stitch-preview {
+            background: var(--surface2);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .originals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .original-thumb {
+            aspect-ratio: 9/16;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .original-thumb:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 16px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Video player */
+        .video-player-mock {
+            background: linear-gradient(135deg, #0a0a0f, #111118);
+            border-radius: var(--radius-md);
+            aspect-ratio: 9/16;
+            max-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .video-play-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            transition: all var(--transition-base);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .video-player-mock:hover .video-play-icon {
+            background: rgba(124, 58, 237, 0.3);
+            transform: scale(1.08);
+            box-shadow: 0 0 24px rgba(124, 58, 237, 0.3);
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px 12px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+        }
+
+        .video-progress {
+            flex: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .video-progress-fill {
+            width: 30%;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .video-time-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ============ SCREEN 4: UPLOAD ============ */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-xl);
+            padding: 56px 40px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(24, 24, 27, 0.5), rgba(15, 15, 20, 0.5));
+            margin-bottom: 24px;
+            transition: all var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-xl);
+            background: conic-gradient(from 0deg, var(--accent), var(--pink), var(--blue), var(--accent));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+            z-index: -1;
+            animation: borderRotate 4s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.drag-over {
+            border-color: transparent;
+            background: var(--accent-glow);
+        }
+
+        .upload-zone.drag-over::before { opacity: 0.5; }
+
+        .upload-icon { font-size: 44px; margin-bottom: 16px; filter: grayscale(0.3); }
+
+        .upload-text {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: -0.2px;
+        }
+
+        .upload-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .upload-types {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .upload-type-option {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface2);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+            backdrop-filter: blur(8px);
+        }
+
+        .upload-type-option:hover {
+            border-color: var(--accent);
+            color: var(--accent-light);
+            background: var(--accent-glow);
+        }
+
+        .upload-queue {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+
+        .upload-queue-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upload-file-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background var(--transition-fast);
+        }
+
+        .upload-file-item:last-child { border-bottom: none; }
+        .upload-file-item:hover { background: rgba(255, 255, 255, 0.015); }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .file-icon.audio { background: var(--blue-bg); border: 1px solid rgba(96, 165, 250, 0.15); }
+        .file-icon.image { background: var(--green-bg); border: 1px solid rgba(52, 211, 153, 0.15); }
+        .file-icon.video { background: var(--yellow-bg); border: 1px solid rgba(251, 191, 36, 0.12); }
+
+        .file-info { flex: 1; min-width: 0; }
+        .file-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-size { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .file-progress { width: 130px; flex-shrink: 0; }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--surface3);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-fill.uploading { background: linear-gradient(90deg, var(--blue), #818cf8); }
+        .progress-fill.processing { background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+        .progress-fill.done { background: linear-gradient(90deg, var(--green), #6ee7b7); }
+
+        .progress-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .timestamp-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .timestamp-input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 12px;
+            color: var(--text);
+            font-family: inherit;
+            width: 170px;
+            transition: all var(--transition-fast);
+        }
+
+        .timestamp-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* ============ SCREEN 5: CALL DETAIL ============ */
+        .detail-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+
+        .detail-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-body { padding: 24px; }
+
+        .detail-meta {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item { font-size: 13px; }
+
+        .meta-label {
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .meta-value { font-weight: 500; color: var(--text-secondary); }
+
+        .full-transcript {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .transcript-segment {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .transcript-segment:hover { background: rgba(255, 255, 255, 0.03); }
+
+        .segment-time {
+            font-size: 11px;
+            color: var(--accent-light);
+            min-width: 45px;
+            padding-top: 2px;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .segment-text {
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+
+        .highlight {
+            background: var(--accent-glow-strong);
+            padding: 1px 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: var(--accent-light);
+        }
+
+        /* ============ SCREEN 6: CREATE SPACE ============ */
+        .create-space-form {
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            backdrop-filter: blur(12px);
+        }
+
+        .form-group { margin-bottom: 24px; }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: inherit;
+            transition: all var(--transition-base);
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-sm);
+            background: rgba(39, 39, 42, 0.8);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 88px;
+        }
+
+        .avatar-picker {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .avatar-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar-preview::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 22px;
+            background: inherit;
+            opacity: 0.2;
+            filter: blur(10px);
+            z-index: -1;
+        }
+
+        .color-options { display: flex; gap: 8px; }
+
+        .color-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        .color-option:hover { transform: scale(1.15); }
+
+        .color-option.active {
+            border-color: white;
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        /* ============ SCREEN 7: CHAT VIEW ============ */
+        .chat-view-container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .chat-header-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(12px);
+        }
+
+        .chat-person-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 15px;
+        }
+
+        .chat-body {
+            background: linear-gradient(180deg, #0f0f14 0%, #0a0a10 100%);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            padding: 20px 16px;
+            min-height: 420px;
+            position: relative;
+        }
+
+        .chat-body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.03), transparent 70%);
+            pointer-events: none;
+        }
+
+        .chat-date-divider {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .chat-date-divider span {
+            background: rgba(255,255,255,0.06);
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        .chat-msg {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            line-height: 1.45;
+            position: relative;
+        }
+
+        .chat-msg.out {
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+        }
+
+        .chat-msg.in {
+            background: var(--surface3);
+            color: var(--text);
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
+        }
+
+        .chat-msg .msg-time {
+            font-size: 10px;
+            opacity: 0.5;
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .source-indicator {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            margin: 8px 0;
+            font-style: italic;
+            opacity: 0.6;
+        }
+
+        .chat-footer-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(12px);
+        }
+
+        .chat-source-legend {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .legend-item:last-child { margin-bottom: 0; }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ============ SCREEN 8: STATUS VIEW ============ */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .status-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all var(--transition-smooth);
+            position: relative;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            padding: 1px;
+            background: linear-gradient(135deg, transparent, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            transition: background var(--transition-base);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .status-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            border-color: transparent;
+        }
+
+        .status-card:hover::before {
+            background: linear-gradient(135deg, var(--accent), var(--pink));
+        }
+
+        .status-card-footer {
+            padding: 12px 14px;
+        }
+
+        .platform-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Datetime editor overlay */
+        .datetime-editor {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .datetime-editor.show { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .datetime-editor-panel {
+            background: var(--surface-solid);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            width: 320px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .datetime-editor-panel h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .datetime-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .datetime-field { flex: 1; }
+
+        .datetime-field label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .datetime-field input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text);
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .datetime-field input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .datetime-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-ghost {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-ghost:hover { background: var(--surface2); border-color: var(--border-hover); }
+
+        .btn-save {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-save:hover { background: var(--accent-light); }
+
+        /* ============ ANNOTATIONS ============ */
+        .annotation {
+            background: var(--yellow-bg);
+            border-left: 3px solid var(--yellow);
+            padding: 14px 18px;
+            margin: 20px 0;
+            font-size: 12px;
+            color: rgba(251, 191, 36, 0.85);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            line-height: 1.65;
+            backdrop-filter: blur(4px);
+        }
+
+        .annotation strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--yellow);
+        }
+
+        .annotation ul {
+            margin-top: 6px;
+            padding-left: 16px;
+        }
+
+        .annotation li { margin-bottom: 3px; }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .spaces-grid { grid-template-columns: 1fr; }
+            .nav { flex-wrap: wrap; gap: 4px; padding: 10px 16px; }
+            .screen { padding: 80px 16px 32px; }
+            .spaces-header { flex-direction: column; align-items: stretch; }
+            .search-bar { max-width: 100%; }
+            .detail-meta { gap: 16px; }
+            .status-grid { grid-template-columns: 1fr 1fr; }
+            .upload-file-item { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="nav">
+    <span class="nav-title">LifeLog</span>
+    <span class="label">Screens:</span>
+    <button class="active" onclick="showScreen('spaces')">1. Spaces</button>
+    <button onclick="showScreen('create-space')">2. Create Space</button>
+    <button onclick="showScreen('timeline')">3. Timeline</button>
+    <button onclick="showScreen('upload')">4. Upload</button>
+    <button onclick="showScreen('call-detail')">5. Call Detail</button>
+    <button onclick="showScreen('chat-stitch')">6. Chat Stitch</button>
+    <button onclick="showScreen('chat-view')">7. Chat View</button>
+    <button onclick="showScreen('status-view')">8. Status View</button>
+</div>
+
+<!-- Datetime Editor Modal -->
+<div class="datetime-editor" id="datetime-editor" onclick="if(event.target===this)closeDatetimeEditor()">
+    <div class="datetime-editor-panel">
+        <h3>Edit Date & Time</h3>
+        <div class="datetime-row">
+            <div class="datetime-field">
+                <label>Date</label>
+                <input type="date" id="edit-date" value="2026-03-15">
+            </div>
+            <div class="datetime-field">
+                <label>Time</label>
+                <input type="time" id="edit-time" value="10:30">
+            </div>
+        </div>
+        <div class="datetime-actions">
+            <button class="btn-ghost" onclick="closeDatetimeEditor()">Cancel</button>
+            <button class="btn-save" onclick="closeDatetimeEditor()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 1: SPACES LIST ==================== -->
+<div class="screen active" id="screen-spaces">
+    <div class="screen-title">Spaces</div>
+    <div class="screen-desc">Each space represents a person or context. All media and conversations are organized within spaces.</div>
+
+    <div class="spaces-header">
+        <div class="search-bar">
+            <span class="search-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" placeholder="Search spaces or content across all spaces...">
+        </div>
+        <button class="btn-primary" onclick="showScreen('create-space')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Space
+        </button>
+    </div>
+
+    <div class="spaces-grid">
+        <div class="space-card" onclick="showScreen('timeline')">
+            <div class="space-card-header">
+                <div class="space-avatar" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">R</div>
+                <div>
+                    <div class="space-name">Rahul Sharma</div>
+                    <div class="space-meta">Last updated: 2 hours ago</div>
+                </div>
+            </div>
+            <div class="space-stats">
+                <div class="space-stat"><span class="count">12</span> calls</div>
+                <div class="space-stat"><span class="count">34</span> chats</div>
+                <div class="space-stat"><span class="count">8</span> statuses</div>
+                <div class="space-stat"><span class="count">5</span> media</div>
+            </div>
+        </div>
+
+        <div class="space-card">
+            <div class="space-card-header">
+                <div class="space-avatar" style="background: linear-gradient(135deg, #059669, #047857);">P</div>
+                <div>
+                    <div class="space-name">Priya Patel</div>
+                    <div class="space-meta">Last updated: 1 day ago</div>
+                </div>
+            </div>
+            <div class="space-stats">
+                <div class="space-stat"><span class="count">5</span> calls</div>
+                <div class="space-stat"><span class="count">18</span> chats</div>
+                <div class="space-stat"><span class="count">3</span> statuses</div>
+                <div class="space-stat"><span class="count">2</span> media</div>
+            </div>
+        </div>
+
+        <div class="space-card">
+            <div class="space-card-header">
+                <div class="space-avatar" style="background: linear-gradient(135deg, #ea580c, #c2410c);">A</div>
+                <div>
+                    <div class="space-name">Amit Kumar</div>
+                    <div class="space-meta">Last updated: 3 days ago</div>
+                </div>
+            </div>
+            <div class="space-stats">
+                <div class="space-stat"><span class="count">3</span> calls</div>
+                <div class="space-stat"><span class="count">22</span> chats</div>
+                <div class="space-stat"><span class="count">15</span> statuses</div>
+                <div class="space-stat"><span class="count">7</span> media</div>
+            </div>
+        </div>
+
+        <div class="space-card space-card-new" onclick="showScreen('create-space')">
+            <div>
+                <div class="plus-icon">+</div>
+                <div style="color: var(--text-muted); font-size: 13px; font-weight: 500;">Create New Space</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation">
+        <strong>Design Note: Global Search</strong>
+        The search bar searches across ALL spaces — transcripts, OCR text, and metadata. Results link back to the specific item within its space.
+    </div>
+</div>
+
+<!-- ==================== SCREEN 2: CREATE SPACE ==================== -->
+<div class="screen" id="screen-create-space">
+    <div class="screen-title">Create New Space</div>
+    <div class="screen-desc">A space is a container for all media and conversations related to one person or context.</div>
+
+    <div class="create-space-form">
+        <div class="form-group">
+            <label class="form-label">Space Name</label>
+            <input class="form-input" type="text" placeholder="e.g., Rahul Sharma">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
+            <textarea class="form-textarea" placeholder="Any notes about this space..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Avatar</label>
+            <div class="avatar-picker">
+                <div class="avatar-preview">R</div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Choose color:</div>
+                    <div class="color-options">
+                        <div class="color-option active" style="background: #7c3aed;"></div>
+                        <div class="color-option" style="background: #059669;"></div>
+                        <div class="color-option" style="background: #ea580c;"></div>
+                        <div class="color-option" style="background: #2563eb;"></div>
+                        <div class="color-option" style="background: #db2777;"></div>
+                        <div class="color-option" style="background: #d97706;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" style="width: 100%; justify-content: center; padding: 12px 20px;">Create Space</button>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 3: SPACE TIMELINE ==================== -->
+<div class="screen" id="screen-timeline">
+    <div class="screen-title" style="display: flex; align-items: center; gap: 12px;">
+        <button class="back-btn" onclick="showScreen('spaces')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="space-avatar" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); width: 36px; height: 36px; font-size: 15px;">R</div>
+        Rahul Sharma
+    </div>
+    <div class="screen-desc">Unified timeline of all interactions — click any item to expand.</div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500;">Filter:</span>
+            <div class="filter-chip active">All</div>
+            <div class="filter-chip">Calls</div>
+            <div class="filter-chip">Chats</div>
+            <div class="filter-chip">Status</div>
+            <div class="filter-chip">Media</div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="view-toggle">
+                <button class="view-toggle-btn active">Timeline</button>
+                <button class="view-toggle-btn" onclick="showScreen('chat-view')">Chat</button>
+            </div>
+            <button class="btn-primary" onclick="showScreen('upload')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Upload
+            </button>
+        </div>
+    </div>
+
+    <div class="search-bar" style="max-width: 100%; margin-bottom: 20px;">
+        <span class="search-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" placeholder="Search within this space... (transcripts, OCR text, notes)">
+    </div>
+
+    <div class="timeline">
+        <!-- Date group -->
+        <div class="timeline-date">March 15, 2026</div>
+
+        <!-- Call Recording Item -->
+        <div class="timeline-item" onclick="toggleContent(this)">
+            <div class="timeline-item-header">
+                <span class="item-type-badge badge-call">CALL</span>
+                <span class="item-time">
+                    10:30 AM
+                    <button class="edit-time-btn" onclick="event.stopPropagation(); openDatetimeEditor()">edit</button>
+                </span>
+                <span class="item-title">Call Recording — 5:32 duration</span>
+                <div class="item-actions">
+                    <button class="item-action-btn" onclick="event.stopPropagation(); showScreen('call-detail')">Expand</button>
+                </div>
+            </div>
+            <div class="item-content">
+                <div class="item-content-inner">
+                    <div class="audio-player">
+                        <button class="play-btn">&#9654;</button>
+                        <div class="waveform" id="waveform-1"></div>
+                        <span class="audio-time">1:56 / 5:32</span>
+                    </div>
+                    <div class="section-title">Transcript <span class="section-badge">Hinglish</span></div>
+                    <div class="transcript-preview">
+                        <div class="transcript-line"><span class="transcript-time">0:00</span> Haan bhai, kal ka plan final hai kya?</div>
+                        <div class="transcript-line"><span class="transcript-time">0:05</span> Haan yaar, 6 baje milte hain Connaught Place pe.</div>
+                        <div class="transcript-line"><span class="transcript-time">0:12</span> Theek hai, main Metro se aaunga. Rajiv Chowk se nikal lunga.</div>
+                        <div class="transcript-line"><span class="transcript-time">0:20</span> Suno, Priya bhi aa rahi hai. Usse bhi bata do timing.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Chat Screenshots (Stitched) -->
+        <div class="timeline-item" onclick="toggleContent(this)">
+            <div class="timeline-item-header">
+                <span class="item-type-badge badge-chat">CHAT</span>
+                <span class="item-time">
+                    11:15 AM
+                    <button class="edit-time-btn" onclick="event.stopPropagation(); openDatetimeEditor()">edit</button>
+                </span>
+                <span class="item-title">WhatsApp Chat — 4 screenshots &rarr; stitched</span>
+                <div class="item-actions">
+                    <button class="item-action-btn" onclick="event.stopPropagation(); showScreen('chat-stitch')">Expand</button>
+                </div>
+            </div>
+            <div class="item-content">
+                <div class="item-content-inner">
+                    <div class="chat-reconstruction">
+                        <div class="chat-bubble received">
+                            <div class="bubble-sender">Rahul</div>
+                            Bhai party ka plan final karo
+                            <div class="bubble-time">11:02 AM</div>
+                        </div>
+                        <div class="chat-bubble sent">
+                            Haan kar raha hoon, venue decide karna hai bas
+                            <div class="bubble-time">11:05 AM</div>
+                        </div>
+                        <div class="chat-bubble received">
+                            <div class="bubble-sender">Rahul</div>
+                            CP mein chalte hain, wahi sab accessible hai
+                            <div class="bubble-time">11:08 AM</div>
+                        </div>
+                        <div class="chat-bubble sent">
+                            Done, booking kar deta hoon
+                            <div class="bubble-time">11:10 AM</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted); opacity: 0.7;">
+                        Transcribed from OCR. Click "Expand" to see stitched image & originals.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Update -->
+        <div class="timeline-item" onclick="toggleContent(this)">
+            <div class="timeline-item-header">
+                <span class="item-type-badge badge-status">STATUS</span>
+                <span class="item-time">
+                    2:00 PM
+                    <button class="edit-time-btn" onclick="event.stopPropagation(); openDatetimeEditor()">edit</button>
+                </span>
+                <span class="item-title">WhatsApp Status — Video (0:15)</span>
+                <div class="item-actions">
+                    <button class="item-action-btn" onclick="event.stopPropagation(); showScreen('status-view')">Expand</button>
+                </div>
+            </div>
+            <div class="item-content">
+                <div class="item-content-inner">
+                    <div class="video-player-mock" style="max-width: 240px;">
+                        <div class="video-play-icon">&#9654;</div>
+                        <div class="video-controls">
+                            <span class="video-time-label">0:05</span>
+                            <div class="video-progress"><div class="video-progress-fill"></div></div>
+                            <span class="video-time-label">0:15</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Another date -->
+        <div class="timeline-date">March 14, 2026</div>
+
+        <!-- Screenshot -->
+        <div class="timeline-item" onclick="toggleContent(this)">
+            <div class="timeline-item-header">
+                <span class="item-type-badge badge-media">MEDIA</span>
+                <span class="item-time">
+                    8:30 PM
+                    <button class="edit-time-btn" onclick="event.stopPropagation(); openDatetimeEditor()">edit</button>
+                </span>
+                <span class="item-title">Screenshot — Instagram DM</span>
+                <div class="item-actions">
+                    <button class="item-action-btn" onclick="event.stopPropagation()">Expand</button>
+                </div>
+            </div>
+            <div class="item-content">
+                <div class="item-content-inner">
+                    <div class="stitch-preview" style="max-width: 240px;">
+                        <span style="font-size: 24px; display: block; margin-bottom: 8px; opacity: 0.5;">&#128247;</span>
+                        Screenshot preview<br>
+                        <span style="font-size: 11px; opacity: 0.6;">(click to view full size)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call -->
+        <div class="timeline-item" onclick="toggleContent(this)">
+            <div class="timeline-item-header">
+                <span class="item-type-badge badge-call">CALL</span>
+                <span class="item-time">
+                    6:15 PM
+                    <button class="edit-time-btn" onclick="event.stopPropagation(); openDatetimeEditor()">edit</button>
+                </span>
+                <span class="item-title">Call Recording — 12:08 duration</span>
+                <div class="item-actions">
+                    <button class="item-action-btn" onclick="event.stopPropagation()">Expand</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Snapchat Status -->
+        <div class="timeline-item" onclick="toggleContent(this)">
+            <div class="timeline-item-header">
+                <span class="item-type-badge badge-status">STATUS</span>
+                <span class="item-time">
+                    4:00 PM
+                    <button class="edit-time-btn" onclick="event.stopPropagation(); openDatetimeEditor()">edit</button>
+                </span>
+                <span class="item-title">Snapchat Story — 3 snaps</span>
+                <div class="item-actions">
+                    <button class="item-action-btn" onclick="event.stopPropagation()">Expand</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation">
+        <strong>Design Note: Editable Timestamps</strong>
+        Every item has an "edit" link next to its timestamp. Clicking it opens a modal with both date and time pickers. Changing the datetime automatically re-sorts the timeline. Timestamp source (auto/manual) is shown in the detail view.
+    </div>
+
+    <div class="annotation">
+        <strong>Design Note: Inline vs Expanded</strong>
+        Clicking an item toggles its inline preview (transcript snippet, chat bubbles, thumbnail) with a smooth expand/collapse animation. The "Expand" button opens the full detail view with original uploads, metadata, and editing controls.
+    </div>
+</div>
+
+<!-- ==================== SCREEN 4: UPLOAD FLOW ==================== -->
+<div class="screen" id="screen-upload">
+    <div class="screen-title" style="display: flex; align-items: center; gap: 12px;">
+        <button class="back-btn" onclick="showScreen('timeline')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        Upload to: Rahul Sharma
+    </div>
+    <div class="screen-desc">Drag and drop files or click to browse. You can upload multiple files and assign types and timestamps.</div>
+
+    <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="upload-text">Drop files here or click to browse</div>
+        <div class="upload-subtext">Supports: Images (PNG, JPG), Videos (MP4, MOV), Audio (MP3, WAV, M4A, OGG)</div>
+        <div class="upload-types">
+            <div class="upload-type-option">&#128222; Call Recording</div>
+            <div class="upload-type-option">&#128172; Chat Screenshots</div>
+            <div class="upload-type-option">&#128247; Status (WA/Snap/Insta)</div>
+            <div class="upload-type-option">&#128206; Other Media</div>
+        </div>
+    </div>
+
+    <div class="upload-queue">
+        <div class="upload-queue-header">
+            <span>Upload Queue (4 files)</span>
+            <span style="font-size: 12px; color: var(--green); font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; background: var(--green); border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
+                Processing...
+            </span>
+        </div>
+
+        <!-- File 1: Done -->
+        <div class="upload-file-item">
+            <div class="file-icon audio">&#127925;</div>
+            <div class="file-info">
+                <div class="file-name">call_rahul_march15.mp3</div>
+                <div class="file-size">4.2 MB &bull; Call Recording</div>
+            </div>
+            <div class="timestamp-input-group">
+                <input class="timestamp-input" type="datetime-local" value="2026-03-15T10:30">
+            </div>
+            <div class="file-progress">
+                <div class="progress-bar"><div class="progress-fill done" style="width: 100%"></div></div>
+                <div class="progress-label" style="color: var(--green);">&#10003; Transcribed</div>
+            </div>
+        </div>
+
+        <!-- File 2: Processing -->
+        <div class="upload-file-item">
+            <div class="file-icon image">&#128247;</div>
+            <div class="file-info">
+                <div class="file-name">whatsapp_chat_1.png</div>
+                <div class="file-size">1.1 MB &bull; Chat Screenshot</div>
+            </div>
+            <div class="timestamp-input-group">
+                <input class="timestamp-input" type="datetime-local" value="2026-03-15T11:15">
+            </div>
+            <div class="file-progress">
+                <div class="progress-bar"><div class="progress-fill processing" style="width: 65%"></div></div>
+                <div class="progress-label">OCR processing...</div>
+            </div>
+        </div>
+
+        <!-- File 3: Processing -->
+        <div class="upload-file-item">
+            <div class="file-icon image">&#128247;</div>
+            <div class="file-info">
+                <div class="file-name">whatsapp_chat_2.png</div>
+                <div class="file-size">980 KB &bull; Chat Screenshot</div>
+            </div>
+            <div class="timestamp-input-group">
+                <input class="timestamp-input" type="datetime-local" value="2026-03-15T11:15">
+            </div>
+            <div class="file-progress">
+                <div class="progress-bar"><div class="progress-fill processing" style="width: 40%"></div></div>
+                <div class="progress-label">OCR processing...</div>
+            </div>
+        </div>
+
+        <!-- File 4: Uploading -->
+        <div class="upload-file-item">
+            <div class="file-icon video">&#127910;</div>
+            <div class="file-info">
+                <div class="file-name">wa_status_video.mp4</div>
+                <div class="file-size">8.5 MB &bull; WhatsApp Status</div>
+            </div>
+            <div class="timestamp-input-group">
+                <input class="timestamp-input" type="datetime-local" value="2026-03-15T14:00">
+            </div>
+            <div class="file-progress">
+                <div class="progress-bar"><div class="progress-fill uploading" style="width: 78%"></div></div>
+                <div class="progress-label">Uploading 78%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation" style="margin-top: 20px;">
+        <strong>Design Note: Batch Upload</strong>
+        Users select a content type, then upload multiple files at once. Each file gets a timestamp picker (since Google Drive strips EXIF).
+        If multiple chat screenshots share the same timestamp, they are auto-grouped and stitching is attempted.
+        Progress updates in real-time via WebSocket — showing upload %, then processing status (OCR, transcription, stitching).
+    </div>
+
+    <div class="annotation">
+        <strong>Design Note: Smart Grouping</strong>
+        When multiple chat screenshots are uploaded together, the system asks: "Stitch these into one conversation?"
+        User can confirm, reorder, or exclude images before stitching.
+    </div>
+
+    <div class="annotation">
+        <strong>Design Note: Animated Upload Zone</strong>
+        When files are dragged over the upload zone, the dashed border animates with a rotating gradient effect (conic-gradient), providing clear visual feedback that the drop target is active.
+    </div>
+</div>
+
+<!-- ==================== SCREEN 5: CALL DETAIL ==================== -->
+<div class="screen" id="screen-call-detail">
+    <div class="screen-title" style="display: flex; align-items: center; gap: 12px;">
+        <button class="back-btn" onclick="showScreen('timeline')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        Call Recording Detail
+    </div>
+    <div class="screen-desc">Full view of call recording with synced transcript and search.</div>
+
+    <div class="detail-panel">
+        <div class="detail-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="item-type-badge badge-call">CALL RECORDING</span>
+                <span style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">March 15, 2026</span>
+            </div>
+            <div class="item-actions">
+                <button class="item-action-btn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align: -1px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit
+                </button>
+                <button class="item-action-btn" style="color: var(--red);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align: -1px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Delete
+                </button>
+            </div>
+        </div>
+
+        <div class="detail-body">
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Timestamp</div>
+                    <div class="meta-value editable" onclick="openDatetimeEditor()">March 15, 2026 — 10:30 AM
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: 0; margin-left: 4px; opacity: 0.5;"><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Duration</div>
+                    <div class="meta-value">5:32</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Source</div>
+                    <div class="meta-value">User provided</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">File</div>
+                    <div class="meta-value">call_rahul_march15.mp3 (4.2 MB)</div>
+                </div>
+            </div>
+
+            <!-- Audio Player -->
+            <div class="section-title">Audio Player</div>
+            <div class="audio-player">
+                <button class="play-btn">&#9654;</button>
+                <div class="waveform" id="waveform-detail"></div>
+                <span class="audio-time">1:56 / 5:32</span>
+            </div>
+
+            <!-- Transcript -->
+            <div class="section-title">Transcript <span class="section-badge">Hinglish &bull; Whisper</span></div>
+            <div class="search-bar" style="max-width: 100%; margin-bottom: 12px;">
+                <span class="search-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" placeholder="Search in transcript..." value="party">
+            </div>
+
+            <div class="full-transcript">
+                <div class="transcript-segment">
+                    <div class="segment-time">0:00</div>
+                    <div class="segment-text">Haan bhai, kal ka plan final hai kya?</div>
+                </div>
+                <div class="transcript-segment">
+                    <div class="segment-time">0:05</div>
+                    <div class="segment-text">Haan yaar, 6 baje milte hain Connaught Place pe.</div>
+                </div>
+                <div class="transcript-segment">
+                    <div class="segment-time">0:12</div>
+                    <div class="segment-text">Theek hai, main Metro se aaunga. Rajiv Chowk se nikal lunga.</div>
+                </div>
+                <div class="transcript-segment">
+                    <div class="segment-time">0:20</div>
+                    <div class="segment-text">Suno, Priya bhi aa rahi hai. Usse bhi bata do timing.</div>
+                </div>
+                <div class="transcript-segment">
+                    <div class="segment-time">0:30</div>
+                    <div class="segment-text">Aur <span class="highlight">party</span> ke liye kuch order karna hai? Cake wagairah?</div>
+                </div>
+                <div class="transcript-segment">
+                    <div class="segment-time">0:38</div>
+                    <div class="segment-text">Haan, ek chocolate cake order kar dena. Aur cold drinks bhi le lena.</div>
+                </div>
+                <div class="transcript-segment">
+                    <div class="segment-time">0:50</div>
+                    <div class="segment-text">Okay done, <span class="highlight">party</span> setup main dekh lunga. Tum bas time pe aa jaana.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation" style="margin-top: 20px;">
+        <strong>Design Note: Transcript Sync</strong>
+        Clicking a transcript line seeks the audio player to that timestamp. Search highlights matching text within the transcript.
+        The transcript is editable — users can correct OCR/Whisper mistakes inline.
+    </div>
+</div>
+
+<!-- ==================== SCREEN 6: CHAT STITCH VIEW ==================== -->
+<div class="screen" id="screen-chat-stitch">
+    <div class="screen-title" style="display: flex; align-items: center; gap: 12px;">
+        <button class="back-btn" onclick="showScreen('timeline')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        WhatsApp Chat — Stitched View
+    </div>
+    <div class="screen-desc">Multiple screenshots stitched together with OCR transcription. Switch between views.</div>
+
+    <div class="detail-panel">
+        <div class="detail-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="item-type-badge badge-chat">WHATSAPP CHAT</span>
+                <span style="font-size: 13px; color: var(--text-secondary);">4 screenshots &rarr; stitched</span>
+            </div>
+            <div class="meta-item" style="text-align: right;">
+                <div class="meta-label">Timestamp</div>
+                <div class="meta-value editable" onclick="openDatetimeEditor()">March 15, 2026 — 11:15 AM
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: 0; margin-left: 4px; opacity: 0.5;"><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-body">
+            <!-- View tabs -->
+            <div class="stitch-tabs">
+                <div class="stitch-tab active" onclick="switchStitchView(this, 'chat-view-tab')">Chat View</div>
+                <div class="stitch-tab" onclick="switchStitchView(this, 'stitched-tab')">Stitched Image</div>
+                <div class="stitch-tab" onclick="switchStitchView(this, 'originals-tab')">Originals</div>
+            </div>
+
+            <!-- Tab: Chat View -->
+            <div id="chat-view-tab" class="stitch-tab-content">
+                <div class="chat-reconstruction">
+                    <div class="chat-bubble received">
+                        <div class="bubble-sender">Rahul</div>
+                        Bhai party ka plan final karo
+                        <div class="bubble-time">11:02 AM</div>
+                    </div>
+                    <div class="chat-bubble sent">
+                        Haan kar raha hoon, venue decide karna hai bas
+                        <div class="bubble-time">11:05 AM</div>
+                    </div>
+                    <div class="chat-bubble received">
+                        <div class="bubble-sender">Rahul</div>
+                        CP mein chalte hain, wahi sab accessible hai
+                        <div class="bubble-time">11:08 AM</div>
+                    </div>
+                    <div class="chat-bubble sent">
+                        Done, booking kar deta hoon
+                        <div class="bubble-time">11:10 AM</div>
+                    </div>
+                    <div class="chat-bubble received">
+                        <div class="bubble-sender">Rahul</div>
+                        Perfect, 7 pm ka rakh dena reservation
+                        <div class="bubble-time">11:12 AM</div>
+                    </div>
+                    <div class="chat-bubble sent">
+                        Kitne log aa rahe hain total?
+                        <div class="bubble-time">11:13 AM</div>
+                    </div>
+                    <div class="chat-bubble received">
+                        <div class="bubble-sender">Rahul</div>
+                        6 confirmed hain, maybe 8 ho jayenge
+                        <div class="bubble-time">11:14 AM</div>
+                    </div>
+                    <div class="chat-bubble sent">
+                        OK 10 ka reservation kar deta hoon to be safe
+                        <div class="bubble-time">11:15 AM</div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted); font-style: italic; opacity: 0.7;">
+                    Chat reconstructed via OCR (PaddleOCR). Click messages to edit if OCR made mistakes.
+                </div>
+            </div>
+
+            <!-- Tab: Stitched Image -->
+            <div id="stitched-tab" class="stitch-tab-content" style="display: none;">
+                <div class="stitch-preview" style="min-height: 400px;">
+                    <span style="font-size: 32px; display: block; margin-bottom: 12px; opacity: 0.4;">&#128444;</span>
+                    Stitched Image Preview<br><br>
+                    <span style="font-size: 13px; color: var(--text-muted);">All 4 screenshots vertically stitched<br>with overlap regions detected & merged</span><br><br>
+                    <span style="font-size: 11px; color: var(--text-muted); opacity: 0.6;">Click to view full resolution<br>Scroll to navigate long conversations</span>
+                </div>
+            </div>
+
+            <!-- Tab: Original Screenshots -->
+            <div id="originals-tab" class="stitch-tab-content" style="display: none;">
+                <div class="originals-grid">
+                    <div class="original-thumb"><span style="opacity: 0.5;">&#128247;</span><br>Page 1</div>
+                    <div class="original-thumb"><span style="opacity: 0.5;">&#128247;</span><br>Page 2</div>
+                    <div class="original-thumb"><span style="opacity: 0.5;">&#128247;</span><br>Page 3</div>
+                    <div class="original-thumb"><span style="opacity: 0.5;">&#128247;</span><br>Page 4</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted); opacity: 0.7;">
+                    Click any thumbnail to view full size. Drag to reorder.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation" style="margin-top: 20px;">
+        <strong>Design Note: Three-Layer View</strong>
+        <ul>
+            <li><strong>Chat View</strong> (default) — OCR-extracted messages in chat bubble format. Editable.</li>
+            <li><strong>Stitched Image</strong> — All screenshots merged into one scrollable image.</li>
+            <li><strong>Original Screenshots</strong> — Individual uploaded files. Drag to reorder.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 7: CHAT VIEW ==================== -->
+<div class="screen" id="screen-chat-view">
+    <div class="screen-title" style="display: flex; align-items: center; gap: 12px;">
+        <button class="back-btn" onclick="showScreen('timeline')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="space-avatar" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); width: 36px; height: 36px; font-size: 15px;">R</div>
+        Rahul Sharma — Chat View
+    </div>
+    <div class="screen-desc">All WhatsApp chats reconstructed into a unified conversation view, ordered by time.</div>
+
+    <div class="chat-view-container">
+        <div class="chat-header-bar">
+            <div class="chat-person-avatar">R</div>
+            <div>
+                <div style="font-weight: 600; font-size: 14px;">Rahul Sharma</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Unified chat from 34 screenshot groups</div>
+            </div>
+            <div style="margin-left: auto;">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn" onclick="showScreen('timeline')">Timeline</button>
+                    <button class="view-toggle-btn active">Chat</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-body">
+            <div class="chat-date-divider"><span>March 14, 2026</span></div>
+
+            <div class="source-indicator">from: whatsapp_chat_group1 (3 screenshots)</div>
+
+            <div class="chat-msg in">
+                Bhai weekend pe kya plan hai?
+                <div class="msg-time">4:30 PM</div>
+            </div>
+            <div class="chat-msg out">
+                Abhi tak kuch nahi socha, kuch suggest karo
+                <div class="msg-time">4:32 PM</div>
+            </div>
+            <div class="chat-msg in">
+                Trekking chalte hain, sab log ready hain
+                <div class="msg-time">4:35 PM</div>
+            </div>
+            <div class="chat-msg out">
+                Which place? Mujhe details chahiye pehle
+                <div class="msg-time">4:36 PM</div>
+            </div>
+
+            <div style="text-align: center; margin: 24px 0;">
+                <span style="font-size: 11px; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 16px; border-radius: 100px; background: rgba(255,255,255,0.03); backdrop-filter: blur(4px);">
+                    &#128222; Call Recording — 12:08 &bull; <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 500;" onclick="event.preventDefault(); showScreen('call-detail')">Listen</a>
+                </span>
+            </div>
+
+            <div class="chat-date-divider"><span>March 15, 2026</span></div>
+
+            <div class="source-indicator">from: whatsapp_chat_group2 (4 screenshots)</div>
+
+            <div class="chat-msg in">
+                Bhai party ka plan final karo
+                <div class="msg-time">11:02 AM</div>
+            </div>
+            <div class="chat-msg out">
+                Haan kar raha hoon, venue decide karna hai bas
+                <div class="msg-time">11:05 AM</div>
+            </div>
+            <div class="chat-msg in">
+                CP mein chalte hain, wahi sab accessible hai
+                <div class="msg-time">11:08 AM</div>
+            </div>
+            <div class="chat-msg out">
+                Done, booking kar deta hoon
+                <div class="msg-time">11:10 AM</div>
+            </div>
+
+            <div style="text-align: center; margin: 24px 0;">
+                <span style="font-size: 11px; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 16px; border-radius: 100px; background: rgba(255,255,255,0.03); backdrop-filter: blur(4px);">
+                    &#128247; WhatsApp Status — Video &bull; <a href="#" style="color: var(--accent-light); text-decoration: none; font-weight: 500;" onclick="event.preventDefault(); showScreen('status-view')">View</a>
+                </span>
+            </div>
+
+            <div class="chat-msg in">
+                Status dekha? Woh CP wali video thi
+                <div class="msg-time">3:15 PM</div>
+            </div>
+            <div class="chat-msg out">
+                Haan dekhi, looks nice!
+                <div class="msg-time">3:20 PM</div>
+            </div>
+        </div>
+
+        <div class="chat-footer-bar">
+            <span style="font-size: 12px; color: var(--text-muted);">Read-only reconstructed view</span>
+            <button class="item-action-btn" style="margin-left: auto;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align: -1px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Search
+            </button>
+        </div>
+    </div>
+
+    <div class="chat-source-legend" style="max-width: 480px; margin: 16px auto 0;">
+        <div style="font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary);">Legend</div>
+        <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, var(--accent), #6d28d9);"></div> Your messages (sent)</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--surface3);"></div> Their messages (received)</div>
+        <div class="legend-item"><div class="legend-dot" style="background: transparent; border: 1px solid var(--text-muted);"></div> Inline events (calls, statuses) shown in timeline order</div>
+    </div>
+
+    <div class="annotation" style="max-width: 480px; margin: 16px auto 0;">
+        <strong>Design Note: Chat View</strong>
+        This view merges ALL chat screenshot groups from this space into one continuous conversation, ordered by time.
+        Non-chat items (calls, statuses) appear as inline markers so you can see the full interaction timeline.
+        The source indicator shows which screenshot group each section came from.
+    </div>
+</div>
+
+<!-- ==================== SCREEN 8: STATUS VIEW ==================== -->
+<div class="screen" id="screen-status-view">
+    <div class="screen-title" style="display: flex; align-items: center; gap: 12px;">
+        <button class="back-btn" onclick="showScreen('timeline')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        Status Updates — Rahul Sharma
+    </div>
+    <div class="screen-desc">All status updates (WhatsApp, Snapchat, Instagram) ordered chronologically.</div>
+
+    <div class="detail-panel" style="margin-bottom: 16px;">
+        <div class="detail-header">
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; margin-right: 4px;">Platform:</span>
+                <div class="filter-chip active">All</div>
+                <div class="filter-chip">WhatsApp</div>
+                <div class="filter-chip">Snapchat</div>
+                <div class="filter-chip">Instagram</div>
+            </div>
+        </div>
+        <div class="detail-body">
+            <div class="status-grid">
+                <!-- Status 1 -->
+                <div class="status-card">
+                    <div class="video-player-mock" style="max-height: 250px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin: 0; border: none; border-bottom: 1px solid var(--border);">
+                        <div class="video-play-icon">&#9654;</div>
+                        <div class="video-controls">
+                            <span class="video-time-label">0:15</span>
+                            <div class="video-progress"><div class="video-progress-fill" style="width: 0;"></div></div>
+                        </div>
+                    </div>
+                    <div class="status-card-footer">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="platform-badge" style="background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.15);">WhatsApp</span>
+                            <button class="edit-time-btn" style="opacity: 1;" onclick="openDatetimeEditor()">edit time</button>
+                        </div>
+                        <div style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">
+                            Mar 15, 2026 — <span class="editable" onclick="openDatetimeEditor()">2:00 PM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status 2 -->
+                <div class="status-card">
+                    <div class="stitch-preview" style="min-height: 180px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin: 0; border: none; border-bottom: 1px solid var(--border);">
+                        <span style="font-size: 28px; display: block; margin-bottom: 6px; opacity: 0.4;">&#128247;</span>
+                        Image Status
+                    </div>
+                    <div class="status-card-footer">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="platform-badge" style="background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(251,191,36,0.12);">Snapchat</span>
+                            <button class="edit-time-btn" style="opacity: 1;" onclick="openDatetimeEditor()">edit time</button>
+                        </div>
+                        <div style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">
+                            Mar 14, 2026 — <span class="editable" onclick="openDatetimeEditor()">6:00 PM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status 3 -->
+                <div class="status-card">
+                    <div class="video-player-mock" style="max-height: 250px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin: 0; border: none; border-bottom: 1px solid var(--border);">
+                        <div class="video-play-icon">&#9654;</div>
+                        <div class="video-controls">
+                            <span class="video-time-label">0:30</span>
+                            <div class="video-progress"><div class="video-progress-fill" style="width: 0;"></div></div>
+                        </div>
+                    </div>
+                    <div class="status-card-footer">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="platform-badge" style="background: var(--pink-bg); color: var(--pink); border: 1px solid rgba(244,114,182,0.15);">Instagram</span>
+                            <button class="edit-time-btn" style="opacity: 1;" onclick="openDatetimeEditor()">edit time</button>
+                        </div>
+                        <div style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">
+                            Mar 13, 2026 — <span class="editable" onclick="openDatetimeEditor()">9:00 PM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status 4 -->
+                <div class="status-card">
+                    <div class="stitch-preview" style="min-height: 180px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin: 0; border: none; border-bottom: 1px solid var(--border);">
+                        <span style="font-size: 28px; display: block; margin-bottom: 6px; opacity: 0.4;">&#128247;</span>
+                        Image Status
+                    </div>
+                    <div class="status-card-footer">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="platform-badge" style="background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.15);">WhatsApp</span>
+                            <button class="edit-time-btn" style="opacity: 1;" onclick="openDatetimeEditor()">edit time</button>
+                        </div>
+                        <div style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">
+                            Mar 12, 2026 — <span class="editable" onclick="openDatetimeEditor()">11:30 AM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation">
+        <strong>Design Note: Status Management</strong>
+        Each status card has an editable timestamp. Clicking "edit time" or the time itself opens a date+time editor modal.
+        Changing the datetime re-sorts the grid. Platform badges (WhatsApp/Snapchat/Instagram) are assigned on upload and can be changed.
+        Videos play inline. Images open in a lightbox on click. Cards have a subtle depth effect with gradient border on hover.
+    </div>
+</div>
+
+<script>
+    // Screen navigation
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const screen = document.getElementById('screen-' + id);
+        if (screen) screen.classList.add('active');
+
+        // Update nav buttons
+        const names = ['spaces', 'create-space', 'timeline', 'upload', 'call-detail', 'chat-stitch', 'chat-view', 'status-view'];
+        const idx = names.indexOf(id);
+        document.querySelectorAll('.nav button').forEach((b, i) => {
+            b.classList.toggle('active', i === idx);
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Expand/collapse with smooth animation
+    function toggleContent(item) {
+        const content = item.querySelector('.item-content');
+        if (!content) return;
+
+        if (content.classList.contains('show')) {
+            content.classList.remove('show');
+        } else {
+            // Close others
+            document.querySelectorAll('.item-content.show').forEach(c => c.classList.remove('show'));
+            content.classList.add('show');
+        }
+    }
+
+    // Stitch view tabs
+    function switchStitchView(tab, viewId) {
+        document.querySelectorAll('.stitch-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.stitch-tab-content').forEach(c => c.style.display = 'none');
+        document.getElementById(viewId).style.display = 'block';
+    }
+
+    // Datetime editor modal
+    function openDatetimeEditor() {
+        document.getElementById('datetime-editor').classList.add('show');
+    }
+
+    function closeDatetimeEditor() {
+        document.getElementById('datetime-editor').classList.remove('show');
+    }
+
+    // Generate waveform bars
+    function generateWaveform(containerId, barCount, playedPercent) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        const playedBars = Math.floor(barCount * playedPercent);
+        for (let i = 0; i < barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'waveform-bar' + (i < playedBars ? ' played' : '');
+            const height = 8 + Math.random() * 24;
+            bar.style.height = height + 'px';
+            container.appendChild(bar);
+        }
+    }
+
+    // Upload zone drag effects
+    const uploadZone = document.getElementById('upload-zone');
+    if (uploadZone) {
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+        });
+    }
+
+    // Filter chip toggle
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            const siblings = this.parentElement.querySelectorAll('.filter-chip');
+            siblings.forEach(s => s.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Color option toggle
+    document.querySelectorAll('.color-option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Init waveforms on load
+    window.addEventListener('load', () => {
+        generateWaveform('waveform-1', 60, 0.35);
+        generateWaveform('waveform-detail', 80, 0.35);
+    });
+
+    // Re-generate waveforms when switching to relevant screens
+    const origShowScreen = showScreen;
+    showScreen = function(id) {
+        origShowScreen(id);
+        setTimeout(() => {
+            if (id === 'timeline') generateWaveform('waveform-1', 60, 0.35);
+            if (id === 'call-detail') generateWaveform('waveform-detail', 80, 0.35);
+        }, 50);
+    };
+</script>
+
+</body>
+</html>

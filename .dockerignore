@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.idea
+*.iml
+__pycache__
+node_modules
+dist
+.vite
+.pytest_cache
+.mypy_cache
+.ruff_cache
+docs
+wireframes.html
+uploads
+*.md
