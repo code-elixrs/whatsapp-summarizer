@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -11,32 +10,37 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.websocket("/ws/transcription/{item_id}")
-async def transcription_status(websocket: WebSocket, item_id: str):
-    """WebSocket endpoint that streams transcription progress for a media item.
+async def _poll_task_progress(
+    websocket: WebSocket,
+    item_id: str,
+    redis_key_prefix: str,
+    processing_state: str,
+    processing_label: str,
+):
+    """Generic WebSocket poller for Celery task progress.
 
-    Clients connect and receive JSON messages with task progress updates.
-    The connection closes automatically when transcription completes or fails.
+    Args:
+        redis_key_prefix: Redis key prefix for task_id mapping (e.g. "transcription_task").
+        processing_state: The custom Celery state name (e.g. "TRANSCRIBING", "OCR_PROCESSING").
+        processing_label: Label sent to client (e.g. "transcribing", "ocr_processing").
     """
     await websocket.accept()
 
     try:
-        # Find the active task for this item by checking Celery's result backend
-        # We poll the task state periodically and push updates to the client
         last_state = None
         last_progress = -1
-        poll_interval = 1.0  # seconds
+        poll_interval = 1.0
 
         while True:
-            # Check all active/reserved tasks to find one for this item
-            task_status = await _get_task_status_for_item(item_id)
+            task_status = await _get_task_status(
+                item_id, redis_key_prefix, processing_state, processing_label
+            )
 
             if task_status != last_state or task_status.get("progress", 0) != last_progress:
                 last_state = task_status
                 last_progress = task_status.get("progress", 0)
                 await websocket.send_json(task_status)
 
-            # Stop polling if terminal state
             status = task_status.get("status", "")
             if status in ("completed", "failed", "not_found"):
                 break
@@ -53,20 +57,41 @@ async def transcription_status(websocket: WebSocket, item_id: str):
             pass
 
 
-async def _get_task_status_for_item(item_id: str) -> dict:
-    """Check Celery for active transcription task status for the given item."""
-    # Use the inspect API to find tasks, or check result backend
-    # Since we use item_id as the first arg, we can search by inspecting active tasks
-    # For simplicity, we'll use the AsyncResult with a predictable task ID pattern
+@router.websocket("/ws/transcription/{item_id}")
+async def transcription_status(websocket: WebSocket, item_id: str):
+    """WebSocket endpoint that streams transcription progress for a media item."""
+    await _poll_task_progress(
+        websocket, item_id,
+        redis_key_prefix="transcription_task",
+        processing_state="TRANSCRIBING",
+        processing_label="transcribing",
+    )
 
-    # Check if there's a result stored for this item
-    # We use Redis to store a mapping from item_id -> task_id
+
+@router.websocket("/ws/ocr/{item_id}")
+async def ocr_status(websocket: WebSocket, item_id: str):
+    """WebSocket endpoint that streams OCR progress for a screenshot item."""
+    await _poll_task_progress(
+        websocket, item_id,
+        redis_key_prefix="ocr_task",
+        processing_state="OCR_PROCESSING",
+        processing_label="ocr_processing",
+    )
+
+
+async def _get_task_status(
+    item_id: str,
+    redis_key_prefix: str,
+    processing_state: str,
+    processing_label: str,
+) -> dict:
+    """Check Celery for task status for the given item."""
     try:
         from redis import Redis
         from app.core.config import settings
 
         redis_client = Redis.from_url(settings.REDIS_URL)
-        task_id = redis_client.get(f"transcription_task:{item_id}")
+        task_id = redis_client.get(f"{redis_key_prefix}:{item_id}")
         redis_client.close()
 
         if task_id:
@@ -75,10 +100,10 @@ async def _get_task_status_for_item(item_id: str) -> dict:
 
             if result.state == "PENDING":
                 return {"status": "pending", "progress": 0, "item_id": item_id}
-            elif result.state == "TRANSCRIBING":
+            elif result.state == processing_state:
                 meta = result.info or {}
                 return {
-                    "status": "transcribing",
+                    "status": processing_label,
                     "progress": meta.get("progress", 0),
                     "segments_done": meta.get("segments_done", 0),
                     "item_id": item_id,

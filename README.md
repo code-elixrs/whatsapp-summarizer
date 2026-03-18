@@ -86,6 +86,29 @@ All commands run inside Docker — nothing is installed on your host machine.
     └── milestones/          # Implementation tracker
 ```
 
+## Updating After Code Changes
+
+```bash
+# Pull latest code
+git pull
+
+# Rebuild and restart (picks up new dependencies, Dockerfile changes, etc.)
+make rebuild
+
+# Apply any new migrations
+make migrate
+
+# Verify everything is healthy
+make status
+make test
+```
+
+If only source code changed (no new dependencies), a faster restart:
+```bash
+docker compose up -d --build
+make migrate
+```
+
 ## Troubleshooting
 
 **Services won't start:**

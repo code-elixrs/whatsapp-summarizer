@@ -64,6 +64,38 @@ export interface TranscriptionStatus {
   result?: Record<string, unknown>;
 }
 
+export interface ChatMessage {
+  id: string;
+  media_item_id: string;
+  sender: string | null;
+  message: string;
+  message_timestamp: string | null;
+  message_order: number;
+  is_sent: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessagesResponse {
+  messages: ChatMessage[];
+  total: number;
+}
+
+export interface ChatMessageUpdate {
+  sender?: string | null;
+  message?: string;
+  message_timestamp?: string | null;
+  is_sent?: boolean;
+}
+
+export interface OCRStatus {
+  status: "pending" | "ocr_processing" | "completed" | "failed" | "not_found";
+  progress: number;
+  item_id: string;
+  error?: string;
+  result?: Record<string, unknown>;
+}
+
 export interface UploadingFile {
   id: string;
   file: File;

@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     WHISPER_COMPUTE_TYPE: str = "auto"  # "auto", "int8", "float16", "float32"
     TRANSCRIPTION_CONCURRENCY: int = 1
 
+    # PaddleOCR
+    OCR_MODEL_DIR: str = "/ocr-models"
+    OCR_USE_GPU: str = "auto"  # "auto", "true", "false"
+
     @property
     def database_url(self) -> str:
         return (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { MediaItem, MediaItemUpdate } from "../../types/media";
 import { updateItem, deleteItem } from "../../lib/media";
 import { CallDetailView } from "../audio/CallDetailView";
+import { ChatDetailView } from "../chat/ChatDetailView";
 import styles from "./TimelineItem.module.css";
 
 interface TimelineItemProps {
@@ -51,6 +52,7 @@ export function TimelineItem({ item, onUpdate }: TimelineItemProps) {
   const isImage = item.mime_type.startsWith("image/");
   const isAudio = item.mime_type.startsWith("audio/");
   const isVideo = item.mime_type.startsWith("video/");
+  const isChatScreenshot = item.content_type === "chat_screenshot" && isImage;
 
   return (
     <div className={styles.item}>
@@ -89,11 +91,12 @@ export function TimelineItem({ item, onUpdate }: TimelineItemProps) {
         <span className={styles.title}>
           {item.title || item.file_name}
         </span>
-        {isAudio && item.processing_status !== "completed" && (
+        {(isAudio || isChatScreenshot) && item.processing_status !== "completed" && (
           <span className={`${styles.statusBadge} ${styles[`status_${item.processing_status}`]}`}>
-            {item.processing_status === "processing" ? "Transcribing..." :
-             item.processing_status === "pending" ? "Queued" :
-             item.processing_status === "failed" ? "Failed" : ""}
+            {item.processing_status === "processing"
+              ? (isAudio ? "Transcribing..." : "OCR Processing...")
+              : item.processing_status === "pending" ? "Queued"
+              : item.processing_status === "failed" ? "Failed" : ""}
           </span>
         )}
         <span className={styles.size}>{formatSize(item.file_size)}</span>
@@ -111,7 +114,10 @@ export function TimelineItem({ item, onUpdate }: TimelineItemProps) {
 
       {expanded && (
         <div className={styles.content}>
-          {isImage && (
+          {isChatScreenshot && (
+            <ChatDetailView item={item} onUpdate={onUpdate} />
+          )}
+          {isImage && !isChatScreenshot && (
             <img
               src={item.file_url}
               alt={item.file_name}

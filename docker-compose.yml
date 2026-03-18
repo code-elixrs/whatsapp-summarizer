@@ -54,6 +54,7 @@ services:
       - ./backend:/app
       - uploads:/app/uploads
       - whisper-models:/models
+      - ocr-models:/ocr-models
     depends_on:
       db:
         condition: service_healthy
@@ -78,3 +79,4 @@ volumes:
   redisdata:
   uploads:
   whisper-models:
+  ocr-models:

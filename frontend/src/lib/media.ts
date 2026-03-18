@@ -1,4 +1,4 @@
-import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript } from "../types/media";
+import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript, ChatMessagesResponse, ChatMessageUpdate, ChatMessage } from "../types/media";
 import { apiFetch } from "./api";
 
 export async function uploadFile(
@@ -82,6 +82,27 @@ export function getTranscript(itemId: string): Promise<Transcript> {
 export function retranscribe(itemId: string, whisperModel?: string): Promise<MediaItem> {
   const params = whisperModel ? `?whisper_model=${whisperModel}` : "";
   return apiFetch<MediaItem>(`/items/${itemId}/transcribe${params}`, {
+    method: "POST",
+  });
+}
+
+export function getChatMessages(itemId: string): Promise<ChatMessagesResponse> {
+  return apiFetch<ChatMessagesResponse>(`/items/${itemId}/chat-messages`);
+}
+
+export function updateChatMessage(
+  itemId: string,
+  messageId: string,
+  data: ChatMessageUpdate,
+): Promise<ChatMessage> {
+  return apiFetch<ChatMessage>(`/items/${itemId}/chat-messages/${messageId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function rerunOcr(itemId: string): Promise<MediaItem> {
+  return apiFetch<MediaItem>(`/items/${itemId}/ocr`, {
     method: "POST",
   });
 }

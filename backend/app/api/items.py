@@ -13,7 +13,9 @@ from app.core.database import get_db
 from app.core.storage import delete_file, generate_file_path, get_absolute_path, save_upload
 from app.models.media_item import ContentType, MediaItem, ProcessingStatus, TimestampSource
 from app.models.space import Space
+from app.models.chat_message import ChatMessage
 from app.models.transcript import Transcript, TranscriptSegment
+from app.schemas.chat_message import ChatMessageResponse, ChatMessageUpdate, ChatMessagesResponse
 from app.schemas.media_item import (
     MediaItemListResponse,
     MediaItemResponse,
@@ -93,6 +95,8 @@ async def upload_file(
     await save_upload(content, absolute_path)
 
     is_audio = mime.startswith("audio/")
+    is_chat_screenshot = content_type == ContentType.CHAT_SCREENSHOT and mime.startswith("image/")
+    needs_processing = is_audio or is_chat_screenshot
 
     item = MediaItem(
         space_id=space_id,
@@ -105,7 +109,7 @@ async def upload_file(
         mime_type=mime,
         item_timestamp=item_timestamp,
         timestamp_source=TimestampSource.USER_PROVIDED if item_timestamp else TimestampSource.USER_PROVIDED,
-        processing_status=ProcessingStatus.PENDING if is_audio else ProcessingStatus.COMPLETED,
+        processing_status=ProcessingStatus.PENDING if needs_processing else ProcessingStatus.COMPLETED,
         group_id=group_id,
         group_order=group_order,
         platform=platform,
@@ -119,6 +123,12 @@ async def upload_file(
         from app.tasks.transcribe import transcribe_audio
         task = transcribe_audio.delay(str(item.id), whisper_model)
         logger.info("Queued transcription task %s for item %s", task.id, item.id)
+
+    # Trigger async OCR for chat screenshots
+    if is_chat_screenshot:
+        from app.tasks.ocr import ocr_screenshot
+        task = ocr_screenshot.delay(str(item.id))
+        logger.info("Queued OCR task %s for item %s", task.id, item.id)
 
     return _item_to_response(item)
 
@@ -266,7 +276,7 @@ async def retranscribe_item(
 
 @router.get("/items/{item_id}/transcription-status")
 async def get_transcription_status(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    """Get the current transcription task status for an item."""
+    """Get the current transcription/OCR task status for an item."""
     item = await db.get(MediaItem, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -275,3 +285,65 @@ async def get_transcription_status(item_id: uuid.UUID, db: AsyncSession = Depend
         "item_id": str(item.id),
         "processing_status": item.processing_status.value,
     }
+
+
+@router.get("/items/{item_id}/chat-messages", response_model=ChatMessagesResponse)
+async def get_chat_messages(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Get parsed chat messages for a screenshot item."""
+    item = await db.get(MediaItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    result = await db.execute(
+        select(ChatMessage)
+        .where(ChatMessage.media_item_id == item_id)
+        .order_by(ChatMessage.message_order)
+    )
+    messages = result.scalars().all()
+
+    return ChatMessagesResponse(
+        messages=[ChatMessageResponse.model_validate(m) for m in messages],
+        total=len(messages),
+    )
+
+
+@router.put("/items/{item_id}/chat-messages/{message_id}", response_model=ChatMessageResponse)
+async def update_chat_message(
+    item_id: uuid.UUID,
+    message_id: uuid.UUID,
+    data: ChatMessageUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Edit a chat message (correct OCR errors)."""
+    msg = await db.get(ChatMessage, message_id)
+    if not msg or msg.media_item_id != item_id:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(msg, field, value)
+
+    await db.commit()
+    await db.refresh(msg)
+    return ChatMessageResponse.model_validate(msg)
+
+
+@router.post("/items/{item_id}/ocr", response_model=MediaItemResponse)
+async def rerun_ocr(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Re-trigger OCR for a chat screenshot item."""
+    item = await db.get(MediaItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    if not item.mime_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Only image items can be OCR-processed")
+
+    item.processing_status = ProcessingStatus.PENDING
+    await db.commit()
+    await db.refresh(item)
+
+    from app.tasks.ocr import ocr_screenshot
+    task = ocr_screenshot.delay(str(item.id))
+    logger.info("Queued re-OCR task %s for item %s", task.id, item.id)
+
+    return _item_to_response(item)
