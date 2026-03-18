@@ -1,6 +1,6 @@
 # Milestone 2: Spaces CRUD
 
-**Status:** `IN PROGRESS`
+**Status:** `DONE`
 **Goal:** Create, list, view, edit, delete spaces. First usable feature.
 
 ## Commits

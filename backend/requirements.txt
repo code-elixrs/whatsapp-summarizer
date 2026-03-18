@@ -7,3 +7,4 @@ pydantic-settings==2.7.1
 celery[redis]==5.4.0
 redis==5.2.1
 python-multipart==0.0.20
+aiofiles==24.1.0

@@ -1,31 +1,52 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
+import { UploadZone } from "../components/spaces/UploadZone";
+import { TimelineItem } from "../components/spaces/TimelineItem";
 import { getSpace, deleteSpace } from "../lib/spaces";
+import { listItems } from "../lib/media";
 import type { Space } from "../types/space";
+import type { ContentType, MediaItem } from "../types/media";
 import styles from "./SpaceDetailPage.module.css";
+
+const FILTERS: { value: ContentType | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "call_recording", label: "Calls" },
+  { value: "chat_screenshot", label: "Chats" },
+  { value: "status_update", label: "Status" },
+  { value: "other_media", label: "Media" },
+];
 
 export function SpaceDetailPage() {
   const { spaceId } = useParams<{ spaceId: string }>();
   const navigate = useNavigate();
   const [space, setSpace] = useState<Space | null>(null);
+  const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [filter, setFilter] = useState<ContentType | "all">("all");
+
+  const fetchData = useCallback(async () => {
+    if (!spaceId) return;
+    try {
+      const [spaceData, itemsData] = await Promise.all([
+        getSpace(spaceId),
+        listItems(spaceId, filter === "all" ? undefined : filter),
+      ]);
+      setSpace(spaceData);
+      setItems(itemsData.items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load");
+    } finally {
+      setLoading(false);
+    }
+  }, [spaceId, filter]);
 
   useEffect(() => {
-    if (!spaceId) return;
-    (async () => {
-      try {
-        const data = await getSpace(spaceId);
-        setSpace(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load space");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [spaceId]);
+    fetchData();
+  }, [fetchData]);
 
   async function handleDelete() {
     if (!spaceId) return;
@@ -60,11 +81,6 @@ export function SpaceDetailPage() {
   }
 
   const initial = space.name.charAt(0).toUpperCase();
-  const totalItems =
-    space.item_counts.calls +
-    space.item_counts.chats +
-    space.item_counts.statuses +
-    space.item_counts.media;
 
   return (
     <div className={styles.container}>
@@ -100,14 +116,34 @@ export function SpaceDetailPage() {
         </div>
       </div>
 
-      {/* Timeline placeholder — will be built in Milestone 3 */}
       <div className={styles.timelineSection}>
         <div className={styles.timelineHeader}>
           <h2 className={styles.sectionTitle}>Timeline</h2>
-          <button className={styles.uploadBtn}>+ Upload</button>
+          <button
+            className={styles.uploadBtn}
+            onClick={() => setShowUpload(!showUpload)}
+          >
+            {showUpload ? "Hide Upload" : "+ Upload"}
+          </button>
         </div>
 
-        {totalItems === 0 ? (
+        {showUpload && (
+          <UploadZone spaceId={spaceId!} onUploadComplete={fetchData} />
+        )}
+
+        <div className={styles.filterBar}>
+          {FILTERS.map((f) => (
+            <button
+              key={f.value}
+              className={`${styles.filterChip} ${filter === f.value ? styles.filterActive : ""}`}
+              onClick={() => setFilter(f.value)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {items.length === 0 ? (
           <div className={styles.emptyTimeline}>
             <p className={styles.emptyText}>No items yet</p>
             <p className={styles.emptyHint}>
@@ -115,15 +151,14 @@ export function SpaceDetailPage() {
             </p>
           </div>
         ) : (
-          <div className={styles.emptyTimeline}>
-            <p className={styles.emptyText}>
-              {totalItems} items — timeline view coming soon
-            </p>
+          <div className={styles.timeline}>
+            {items.map((item) => (
+              <TimelineItem key={item.id} item={item} onUpdate={fetchData} />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Delete confirmation modal */}
       {showDeleteConfirm && (
         <div className={styles.overlay} onClick={() => setShowDeleteConfirm(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
