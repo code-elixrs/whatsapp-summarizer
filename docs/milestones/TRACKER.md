@@ -2,8 +2,8 @@
 
 | # | Milestone | Status | Commits |
 |---|-----------|--------|---------|
-| 1 | [Project Foundation & Infrastructure](milestone-1.md) | `IN PROGRESS` | 0/5 |
-| 2 | [Spaces CRUD](milestone-2.md) | `PENDING` | 0/5 |
+| 1 | [Project Foundation & Infrastructure](milestone-1.md) | `DONE` | 5/5 |
+| 2 | [Spaces CRUD](milestone-2.md) | `IN PROGRESS` | 0/5 |
 | 3 | [File Upload & Storage](milestone-3.md) | `PENDING` | 0/9 |
 | 4 | [Call Recording Transcription](milestone-4.md) | `PENDING` | 0/8 |
 | 5 | [Screenshot OCR & Chat Reconstruction](milestone-5.md) | `PENDING` | 0/8 |
