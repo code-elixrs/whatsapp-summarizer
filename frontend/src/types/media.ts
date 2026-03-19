@@ -104,6 +104,43 @@ export interface StitchStatus {
   result?: Record<string, unknown>;
 }
 
+// Unified chat stream types
+export interface ChatStreamMessage {
+  type: "message";
+  id: string;
+  sender: string | null;
+  message: string;
+  message_timestamp: string | null;
+  message_order: number;
+  is_sent: boolean;
+  source_item_id: string;
+  source_group_id: string | null;
+  sort_key: string;
+}
+
+export interface ChatStreamEvent {
+  type: "event";
+  event_type: string;
+  item_id: string;
+  title: string | null;
+  file_name: string;
+  mime_type: string;
+  platform: string | null;
+  duration_seconds: number | null;
+  item_timestamp: string | null;
+  file_url: string;
+  transcript_summary: string | null;
+  sort_key: string;
+}
+
+export type ChatStreamEntry = ChatStreamMessage | ChatStreamEvent;
+
+export interface ChatStreamResponse {
+  entries: ChatStreamEntry[];
+  total_messages: number;
+  total_events: number;
+}
+
 export interface UploadingFile {
   id: string;
   file: File;

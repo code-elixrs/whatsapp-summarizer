@@ -16,6 +16,7 @@ from app.models.space import Space
 from app.models.chat_message import ChatMessage
 from app.models.transcript import Transcript, TranscriptSegment
 from app.schemas.chat_message import ChatMessageResponse, ChatMessageUpdate, ChatMessagesResponse
+from app.schemas.chat_stream import ChatStreamEvent, ChatStreamMessage, ChatStreamResponse
 from app.schemas.media_item import (
     MediaItemListResponse,
     MediaItemResponse,
@@ -491,4 +492,86 @@ async def serve_stitched_file(group_id: uuid.UUID, db: AsyncSession = Depends(ge
         path=absolute_path,
         media_type="image/png",
         filename=f"stitched_{group_id}.png",
+    )
+
+
+@router.get("/spaces/{space_id}/chat-stream", response_model=ChatStreamResponse)
+async def get_chat_stream(space_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Get a unified chat stream merging all chat messages and event markers for a space."""
+    space = await db.get(Space, space_id)
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+
+    # Fetch all chat messages with their parent items
+    msg_result = await db.execute(
+        select(ChatMessage, MediaItem)
+        .join(MediaItem, ChatMessage.media_item_id == MediaItem.id)
+        .where(MediaItem.space_id == space_id)
+        .order_by(ChatMessage.message_order)
+    )
+    msg_rows = msg_result.all()
+
+    # Fetch all non-chat-screenshot items as event markers
+    event_result = await db.execute(
+        select(MediaItem)
+        .where(MediaItem.space_id == space_id)
+        .where(MediaItem.content_type != ContentType.CHAT_SCREENSHOT)
+    )
+    event_items = event_result.scalars().all()
+
+    # Fetch transcript summaries for call recordings (first 200 chars of full_text)
+    transcript_map: dict[uuid.UUID, str] = {}
+    if event_items:
+        call_ids = [i.id for i in event_items if i.content_type == ContentType.CALL_RECORDING]
+        if call_ids:
+            t_result = await db.execute(
+                select(Transcript)
+                .where(Transcript.media_item_id.in_(call_ids))
+            )
+            for t in t_result.scalars().all():
+                if t.full_text:
+                    transcript_map[t.media_item_id] = t.full_text[:200]
+
+    # Build message entries
+    messages: list[ChatStreamMessage] = []
+    for chat_msg, item in msg_rows:
+        sort_key = chat_msg.message_timestamp or item.item_timestamp or item.created_at
+        messages.append(ChatStreamMessage(
+            id=chat_msg.id,
+            sender=chat_msg.sender,
+            message=chat_msg.message,
+            message_timestamp=chat_msg.message_timestamp,
+            message_order=chat_msg.message_order,
+            is_sent=chat_msg.is_sent,
+            source_item_id=item.id,
+            source_group_id=item.group_id,
+            sort_key=sort_key,
+        ))
+
+    # Build event entries
+    events: list[ChatStreamEvent] = []
+    for item in event_items:
+        sort_key = item.item_timestamp or item.created_at
+        events.append(ChatStreamEvent(
+            event_type=item.content_type.value,
+            item_id=item.id,
+            title=item.title,
+            file_name=item.file_name,
+            mime_type=item.mime_type,
+            platform=item.platform,
+            duration_seconds=item.duration_seconds,
+            item_timestamp=item.item_timestamp,
+            file_url=f"/api/files/{item.id}",
+            transcript_summary=transcript_map.get(item.id),
+            sort_key=sort_key,
+        ))
+
+    # Merge and sort by sort_key
+    all_entries: list[ChatStreamMessage | ChatStreamEvent] = [*messages, *events]
+    all_entries.sort(key=lambda e: e.sort_key)
+
+    return ChatStreamResponse(
+        entries=all_entries,
+        total_messages=len(messages),
+        total_events=len(events),
     )

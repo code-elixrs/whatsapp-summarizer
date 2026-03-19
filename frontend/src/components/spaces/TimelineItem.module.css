@@ -104,6 +104,20 @@
   vertical-align: middle;
 }
 
+.platformBadge {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--surface-elevated);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+
 .statusBadge {
   padding: 2px 8px;
   border-radius: var(--radius-full);

@@ -1,4 +1,4 @@
-import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript, ChatMessagesResponse, ChatMessageUpdate, ChatMessage } from "../types/media";
+import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript, ChatMessagesResponse, ChatMessageUpdate, ChatMessage, ChatStreamResponse } from "../types/media";
 import { apiFetch } from "./api";
 
 export async function uploadFile(
@@ -143,4 +143,10 @@ export function stitchGroup(groupId: string, autoOcr = true): Promise<{ status: 
   return apiFetch(`/groups/${groupId}/stitch?auto_ocr=${autoOcr}`, {
     method: "POST",
   });
+}
+
+// Unified chat stream
+
+export function getChatStream(spaceId: string): Promise<ChatStreamResponse> {
+  return apiFetch<ChatStreamResponse>(`/spaces/${spaceId}/chat-stream`);
 }

@@ -3,11 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { UploadZone } from "../components/spaces/UploadZone";
 import { TimelineItem } from "../components/spaces/TimelineItem";
+import { UnifiedChatView } from "../components/chat/UnifiedChatView";
+import { StatusGallery } from "../components/spaces/StatusGallery";
 import { getSpace, deleteSpace } from "../lib/spaces";
 import { listItems } from "../lib/media";
 import type { Space } from "../types/space";
 import type { ContentType, MediaItem } from "../types/media";
 import styles from "./SpaceDetailPage.module.css";
+
+type ViewMode = "timeline" | "chat";
 
 const FILTERS: { value: ContentType | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -27,6 +31,7 @@ export function SpaceDetailPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [filter, setFilter] = useState<ContentType | "all">("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("timeline");
 
   const fetchData = useCallback(async () => {
     if (!spaceId) return;
@@ -81,6 +86,7 @@ export function SpaceDetailPage() {
   }
 
   const initial = space.name.charAt(0).toUpperCase();
+  const isStatusFilter = filter === "status_update";
 
   return (
     <div className={styles.container}>
@@ -118,7 +124,22 @@ export function SpaceDetailPage() {
 
       <div className={styles.timelineSection}>
         <div className={styles.timelineHeader}>
-          <h2 className={styles.sectionTitle}>Timeline</h2>
+          <div className={styles.headerLeft}>
+            <div className={styles.viewToggle}>
+              <button
+                className={`${styles.viewToggleBtn} ${viewMode === "timeline" ? styles.viewToggleActive : ""}`}
+                onClick={() => setViewMode("timeline")}
+              >
+                Timeline
+              </button>
+              <button
+                className={`${styles.viewToggleBtn} ${viewMode === "chat" ? styles.viewToggleActive : ""}`}
+                onClick={() => setViewMode("chat")}
+              >
+                Chat View
+              </button>
+            </div>
+          </div>
           <button
             className={styles.uploadBtn}
             onClick={() => setShowUpload(!showUpload)}
@@ -131,31 +152,41 @@ export function SpaceDetailPage() {
           <UploadZone spaceId={spaceId!} onUploadComplete={fetchData} />
         )}
 
-        <div className={styles.filterBar}>
-          {FILTERS.map((f) => (
-            <button
-              key={f.value}
-              className={`${styles.filterChip} ${filter === f.value ? styles.filterActive : ""}`}
-              onClick={() => setFilter(f.value)}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+        {viewMode === "timeline" && (
+          <>
+            <div className={styles.filterBar}>
+              {FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  className={`${styles.filterChip} ${filter === f.value ? styles.filterActive : ""}`}
+                  onClick={() => setFilter(f.value)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
 
-        {items.length === 0 ? (
-          <div className={styles.emptyTimeline}>
-            <p className={styles.emptyText}>No items yet</p>
-            <p className={styles.emptyHint}>
-              Upload call recordings, chat screenshots, or status updates
-            </p>
-          </div>
-        ) : (
-          <div className={styles.timeline}>
-            {items.map((item) => (
-              <TimelineItem key={item.id} item={item} onUpdate={fetchData} />
-            ))}
-          </div>
+            {isStatusFilter && items.length > 0 ? (
+              <StatusGallery items={items} onUpdate={fetchData} />
+            ) : items.length === 0 ? (
+              <div className={styles.emptyTimeline}>
+                <p className={styles.emptyText}>No items yet</p>
+                <p className={styles.emptyHint}>
+                  Upload call recordings, chat screenshots, or status updates
+                </p>
+              </div>
+            ) : (
+              <div className={styles.timeline}>
+                {items.map((item) => (
+                  <TimelineItem key={item.id} item={item} onUpdate={fetchData} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {viewMode === "chat" && spaceId && (
+          <UnifiedChatView spaceId={spaceId} />
         )}
       </div>
 

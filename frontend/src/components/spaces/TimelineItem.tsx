@@ -95,6 +95,9 @@ export function TimelineItem({ item, onUpdate }: TimelineItemProps) {
               {item.stitched_path ? "Stitched" : `#${item.group_order + 1}`}
             </span>
           )}
+          {item.platform && (
+            <span className={styles.platformBadge}>{item.platform}</span>
+          )}
         </span>
         {(isAudio || isChatScreenshot) && item.processing_status !== "completed" && (
           <span className={`${styles.statusBadge} ${styles[`status_${item.processing_status}`]}`}>
