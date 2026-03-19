@@ -3,7 +3,7 @@ import mimetypes
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -347,3 +347,148 @@ async def rerun_ocr(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     logger.info("Queued re-OCR task %s for item %s", task.id, item.id)
 
     return _item_to_response(item)
+
+
+@router.post("/groups/create", response_model=list[MediaItemResponse])
+async def create_group(
+    item_ids: list[uuid.UUID] = Body(..., embed=True),
+    db: AsyncSession = Depends(get_db),
+):
+    """Group multiple items together for stitching. Assigns a shared group_id."""
+    if len(item_ids) < 2:
+        raise HTTPException(status_code=400, detail="Need at least 2 items to create a group")
+
+    items = []
+    for item_id in item_ids:
+        item = await db.get(MediaItem, item_id)
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
+        items.append(item)
+
+    new_group_id = uuid.uuid4()
+    for i, item in enumerate(items):
+        item.group_id = new_group_id
+        item.group_order = i
+
+    await db.commit()
+    for item in items:
+        await db.refresh(item)
+
+    return [_item_to_response(item) for item in items]
+
+
+@router.delete("/groups/{group_id}")
+async def ungroup_items(group_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Remove group assignment from all items in a group."""
+    result = await db.execute(
+        select(MediaItem).where(MediaItem.group_id == group_id)
+    )
+    items = result.scalars().all()
+    if not items:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    for item in items:
+        item.group_id = None
+        item.group_order = None
+        item.stitched_path = None
+
+    await db.commit()
+    return {"status": "ungrouped", "items_affected": len(items)}
+
+
+@router.get("/groups/{group_id}/items", response_model=list[MediaItemResponse])
+async def get_group_items(group_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Get all items in a group, ordered by group_order."""
+    result = await db.execute(
+        select(MediaItem)
+        .where(MediaItem.group_id == group_id)
+        .order_by(MediaItem.group_order.asc())
+    )
+    items = result.scalars().all()
+    if not items:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    return [_item_to_response(item) for item in items]
+
+
+@router.put("/groups/{group_id}/reorder", response_model=list[MediaItemResponse])
+async def reorder_group(
+    group_id: uuid.UUID,
+    item_ids: list[uuid.UUID] = Body(..., embed=True),
+    db: AsyncSession = Depends(get_db),
+):
+    """Reorder items within a group. item_ids must contain all items in the group."""
+    result = await db.execute(
+        select(MediaItem).where(MediaItem.group_id == group_id)
+    )
+    items = result.scalars().all()
+    if not items:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    item_map = {item.id: item for item in items}
+    if set(item_ids) != set(item_map.keys()):
+        raise HTTPException(status_code=400, detail="item_ids must contain all group members")
+
+    for i, item_id in enumerate(item_ids):
+        item_map[item_id].group_order = i
+        item_map[item_id].stitched_path = None  # Clear stale stitch
+
+    await db.commit()
+    ordered = [item_map[iid] for iid in item_ids]
+    for item in ordered:
+        await db.refresh(item)
+
+    return [_item_to_response(item) for item in ordered]
+
+
+@router.post("/groups/{group_id}/stitch")
+async def stitch_group(
+    group_id: uuid.UUID,
+    auto_ocr: bool = Query(default=True),
+    db: AsyncSession = Depends(get_db),
+):
+    """Trigger stitching for a group of screenshots."""
+    result = await db.execute(
+        select(MediaItem)
+        .where(MediaItem.group_id == group_id)
+        .order_by(MediaItem.group_order.asc())
+    )
+    items = result.scalars().all()
+    if len(items) < 2:
+        raise HTTPException(status_code=400, detail="Need at least 2 items to stitch")
+
+    for item in items:
+        item.processing_status = ProcessingStatus.PENDING
+    await db.commit()
+
+    from app.tasks.stitch import stitch_screenshots
+    task = stitch_screenshots.delay(str(group_id), auto_ocr)
+    logger.info("Queued stitch task %s for group %s", task.id, group_id)
+
+    return {
+        "status": "queued",
+        "task_id": task.id,
+        "group_id": str(group_id),
+        "items_count": len(items),
+    }
+
+
+@router.get("/files/stitched/{group_id}")
+async def serve_stitched_file(group_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Serve the stitched image for a group."""
+    result = await db.execute(
+        select(MediaItem)
+        .where(MediaItem.group_id == group_id)
+        .where(MediaItem.stitched_path.isnot(None))
+        .limit(1)
+    )
+    item = result.scalar_one_or_none()
+    if not item or not item.stitched_path:
+        raise HTTPException(status_code=404, detail="Stitched image not found")
+
+    absolute_path = get_absolute_path(item.stitched_path)
+    return FileResponse(
+        path=absolute_path,
+        media_type="image/png",
+        filename=f"stitched_{group_id}.png",
+    )

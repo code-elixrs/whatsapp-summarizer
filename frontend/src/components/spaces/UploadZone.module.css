@@ -108,6 +108,13 @@
   color: var(--text-muted);
 }
 
+.dropHintSub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--accent);
+  font-style: italic;
+}
+
 .hiddenInput {
   display: none;
 }

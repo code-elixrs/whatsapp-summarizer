@@ -92,6 +92,18 @@
   text-overflow: ellipsis;
 }
 
+.groupBadge {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--green-muted);
+  color: var(--green);
+  vertical-align: middle;
+}
+
 .statusBadge {
   padding: 2px 8px;
   border-radius: var(--radius-full);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import type { MediaItem, ChatMessage, ChatMessagesResponse, OCRStatus } from "../../types/media";
-import { getChatMessages, rerunOcr, updateChatMessage } from "../../lib/media";
+import type { MediaItem, ChatMessage, OCRStatus, StitchStatus } from "../../types/media";
+import { getChatMessages, rerunOcr, updateChatMessage, getGroupItems, stitchGroup, reorderGroup } from "../../lib/media";
 import { ChatBubbleView } from "./ChatBubbleView";
 import styles from "./ChatDetailView.module.css";
 
@@ -9,7 +9,7 @@ interface ChatDetailViewProps {
   onUpdate: () => void;
 }
 
-type TabView = "chat" | "screenshot" | "split";
+type TabView = "chat" | "stitched" | "screenshot" | "split";
 
 export function ChatDetailView({ item, onUpdate }: ChatDetailViewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -18,6 +18,13 @@ export function ChatDetailView({ item, onUpdate }: ChatDetailViewProps) {
   const [activeTab, setActiveTab] = useState<TabView>("chat");
 
   const [wsStatus, setWsStatus] = useState<OCRStatus | null>(null);
+  const [stitchWsStatus, setStitchWsStatus] = useState<StitchStatus | null>(null);
+
+  const [groupItems, setGroupItems] = useState<MediaItem[]>([]);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  const hasGroup = !!item.group_id;
+  const hasStitch = !!item.stitched_path;
 
   // Load chat messages
   const loadMessages = useCallback(async () => {
@@ -38,6 +45,13 @@ export function ChatDetailView({ item, onUpdate }: ChatDetailViewProps) {
       loadMessages();
     }
   }, [item.id, item.processing_status, loadMessages]);
+
+  // Load group items
+  useEffect(() => {
+    if (item.group_id) {
+      getGroupItems(item.group_id).then(setGroupItems).catch(() => {});
+    }
+  }, [item.group_id]);
 
   // WebSocket for OCR progress
   useEffect(() => {
@@ -88,31 +102,75 @@ export function ChatDetailView({ item, onUpdate }: ChatDetailViewProps) {
     }
   }
 
+  async function handleStitch() {
+    if (!item.group_id) return;
+    try {
+      await stitchGroup(item.group_id);
+      onUpdate();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start stitching");
+    }
+  }
+
+  // Drag-reorder handlers for group items
+  function handleDragStart(idx: number) {
+    setDragIdx(idx);
+  }
+
+  function handleDragOver(e: React.DragEvent, idx: number) {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === idx) return;
+    const reordered = [...groupItems];
+    const [moved] = reordered.splice(dragIdx, 1);
+    reordered.splice(idx, 0, moved);
+    setGroupItems(reordered);
+    setDragIdx(idx);
+  }
+
+  async function handleDragEnd() {
+    setDragIdx(null);
+    if (!item.group_id || groupItems.length < 2) return;
+    try {
+      await reorderGroup(item.group_id, groupItems.map((i) => i.id));
+      onUpdate();
+    } catch {
+      // reload original order
+      if (item.group_id) {
+        getGroupItems(item.group_id).then(setGroupItems).catch(() => {});
+      }
+    }
+  }
+
   const isProcessing = item.processing_status === "pending" || item.processing_status === "processing";
+
+  // Determine available tabs
+  const tabs: { key: TabView; label: string }[] = [
+    { key: "chat", label: "Chat View" },
+  ];
+  if (hasStitch) {
+    tabs.push({ key: "stitched", label: "Stitched" });
+  }
+  if (hasGroup && groupItems.length > 1) {
+    tabs.push({ key: "screenshot", label: `Originals (${groupItems.length})` });
+  } else {
+    tabs.push({ key: "screenshot", label: "Original" });
+  }
+  tabs.push({ key: "split", label: "Split View" });
 
   return (
     <div className={styles.container}>
       {/* Tab switcher */}
       {!isProcessing && item.processing_status !== "failed" && (
         <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === "chat" ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab("chat")}
-          >
-            Chat View
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === "screenshot" ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab("screenshot")}
-          >
-            Original
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === "split" ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab("split")}
-          >
-            Split View
-          </button>
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              className={`${styles.tab} ${activeTab === t.key ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       )}
 
@@ -163,10 +221,60 @@ export function ChatDetailView({ item, onUpdate }: ChatDetailViewProps) {
             </div>
           )}
 
-          {(activeTab === "screenshot" || activeTab === "split") && (
+          {/* Stitched image tab */}
+          {activeTab === "stitched" && hasStitch && item.group_id && (
             <div className={styles.screenshotPanel}>
               <img
-                src={item.file_url}
+                src={`/api/files/stitched/${item.group_id}`}
+                alt="Stitched screenshot"
+                className={styles.screenshotImg}
+                loading="lazy"
+              />
+            </div>
+          )}
+
+          {/* Originals tab - shows all group items or single screenshot */}
+          {activeTab === "screenshot" && (
+            <div className={styles.originalsPanel}>
+              {hasGroup && groupItems.length > 1 ? (
+                <>
+                  <div className={styles.originalsHint}>Drag to reorder, then re-stitch</div>
+                  {groupItems.map((gi, idx) => (
+                    <div
+                      key={gi.id}
+                      className={`${styles.originalItem} ${dragIdx === idx ? styles.originalItemDragging : ""}`}
+                      draggable
+                      onDragStart={() => handleDragStart(idx)}
+                      onDragOver={(e) => handleDragOver(e, idx)}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <span className={styles.originalOrder}>{idx + 1}</span>
+                      <img
+                        src={gi.file_url}
+                        alt={gi.file_name}
+                        className={styles.originalThumb}
+                        loading="lazy"
+                      />
+                      <span className={styles.originalName}>{gi.file_name}</span>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <img
+                  src={item.file_url}
+                  alt={item.file_name}
+                  className={styles.screenshotImg}
+                  loading="lazy"
+                />
+              )}
+            </div>
+          )}
+
+          {/* Split view - show stitched or original alongside chat */}
+          {activeTab === "split" && (
+            <div className={styles.screenshotPanel}>
+              <img
+                src={hasStitch && item.group_id ? `/api/files/stitched/${item.group_id}` : item.file_url}
                 alt={item.file_name}
                 className={styles.screenshotImg}
                 loading="lazy"
@@ -176,9 +284,14 @@ export function ChatDetailView({ item, onUpdate }: ChatDetailViewProps) {
         </div>
       )}
 
-      {/* Re-run OCR */}
+      {/* Action buttons */}
       {item.processing_status === "completed" && (
         <div className={styles.rerunSection}>
+          {hasGroup && groupItems.length > 1 && (
+            <button className={styles.stitchBtn} onClick={handleStitch}>
+              {hasStitch ? "Re-stitch" : "Stitch Screenshots"}
+            </button>
+          )}
           <button className={styles.rerunBtn} onClick={handleRerunOcr}>
             Re-run OCR
           </button>

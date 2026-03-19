@@ -165,3 +165,88 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* Originals panel */
+.originalsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.originalsHint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: var(--space-1);
+}
+
+.originalItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition: all var(--transition-fast);
+}
+
+.originalItem:hover {
+  border-color: var(--accent);
+}
+
+.originalItemDragging {
+  opacity: 0.5;
+  border-color: var(--accent);
+  background: var(--accent-muted);
+}
+
+.originalOrder {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--accent-muted);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.originalThumb {
+  width: 48px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.originalName {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Stitch button */
+.stitchBtn {
+  padding: var(--space-1) var(--space-3);
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stitchBtn:hover {
+  background: var(--accent-hover);
+}

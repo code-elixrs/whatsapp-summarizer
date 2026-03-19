@@ -79,6 +79,17 @@ async def ocr_status(websocket: WebSocket, item_id: str):
     )
 
 
+@router.websocket("/ws/stitch/{group_id}")
+async def stitch_status(websocket: WebSocket, group_id: str):
+    """WebSocket endpoint that streams stitching progress for a group."""
+    await _poll_task_progress(
+        websocket, group_id,
+        redis_key_prefix="stitch_task",
+        processing_state="STITCHING",
+        processing_label="stitching",
+    )
+
+
 async def _get_task_status(
     item_id: str,
     redis_key_prefix: str,

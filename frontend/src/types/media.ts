@@ -96,6 +96,14 @@ export interface OCRStatus {
   result?: Record<string, unknown>;
 }
 
+export interface StitchStatus {
+  status: "pending" | "stitching" | "completed" | "failed" | "not_found";
+  progress: number;
+  item_id: string;
+  error?: string;
+  result?: Record<string, unknown>;
+}
+
 export interface UploadingFile {
   id: string;
   file: File;

@@ -283,8 +283,11 @@ def ocr_screenshot(self, item_id: str):
             meta={"item_id": item_id, "progress": 20, "status": "running_ocr"},
         )
 
-        # Get file path
-        file_path = os.path.join(settings.UPLOAD_DIR, item.file_path)
+        # Use stitched image if available, otherwise original file
+        if item.stitched_path:
+            file_path = os.path.join(settings.UPLOAD_DIR, item.stitched_path)
+        else:
+            file_path = os.path.join(settings.UPLOAD_DIR, item.file_path)
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Screenshot not found: {file_path}")
 

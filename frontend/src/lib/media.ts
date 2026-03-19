@@ -8,6 +8,8 @@ export async function uploadFile(
   timestamp?: string,
   onProgress?: (progress: number) => void,
   whisperModel?: string,
+  groupId?: string,
+  groupOrder?: number,
 ): Promise<MediaItem> {
   const formData = new FormData();
   formData.append("file", file);
@@ -17,6 +19,12 @@ export async function uploadFile(
   }
   if (whisperModel) {
     formData.append("whisper_model", whisperModel);
+  }
+  if (groupId) {
+    formData.append("group_id", groupId);
+  }
+  if (groupOrder !== undefined) {
+    formData.append("group_order", String(groupOrder));
   }
 
   return new Promise((resolve, reject) => {
@@ -103,6 +111,36 @@ export function updateChatMessage(
 
 export function rerunOcr(itemId: string): Promise<MediaItem> {
   return apiFetch<MediaItem>(`/items/${itemId}/ocr`, {
+    method: "POST",
+  });
+}
+
+// Group & Stitch API
+
+export function createGroup(itemIds: string[]): Promise<MediaItem[]> {
+  return apiFetch<MediaItem[]>("/groups/create", {
+    method: "POST",
+    body: JSON.stringify({ item_ids: itemIds }),
+  });
+}
+
+export function ungroupItems(groupId: string): Promise<void> {
+  return apiFetch<void>(`/groups/${groupId}`, { method: "DELETE" });
+}
+
+export function getGroupItems(groupId: string): Promise<MediaItem[]> {
+  return apiFetch<MediaItem[]>(`/groups/${groupId}/items`);
+}
+
+export function reorderGroup(groupId: string, itemIds: string[]): Promise<MediaItem[]> {
+  return apiFetch<MediaItem[]>(`/groups/${groupId}/reorder`, {
+    method: "PUT",
+    body: JSON.stringify({ item_ids: itemIds }),
+  });
+}
+
+export function stitchGroup(groupId: string, autoOcr = true): Promise<{ status: string; task_id: string; group_id: string }> {
+  return apiFetch(`/groups/${groupId}/stitch?auto_ocr=${autoOcr}`, {
     method: "POST",
   });
 }

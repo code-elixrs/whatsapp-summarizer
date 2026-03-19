@@ -35,7 +35,12 @@ export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
 
       setFiles((prev) => [...prev, ...newFiles]);
 
-      newFiles.forEach((uf) => {
+      // Auto-group multiple chat screenshots in the same batch
+      const isBatchChatScreenshot =
+        selectedType === "chat_screenshot" && newFiles.length > 1;
+      const batchGroupId = isBatchChatScreenshot ? crypto.randomUUID() : undefined;
+
+      newFiles.forEach((uf, index) => {
         uploadFile(
           spaceId,
           uf.file,
@@ -47,6 +52,8 @@ export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
             );
           },
           uf.contentType === "call_recording" ? whisperModel : undefined,
+          batchGroupId,
+          batchGroupId ? index : undefined,
         )
           .then(() => {
             setFiles((prev) =>
@@ -132,6 +139,11 @@ export function UploadZone({ spaceId, onUploadComplete }: UploadZoneProps) {
         </div>
         <div className={styles.dropHint}>
           Images, audio, video — up to 500MB each
+          {selectedType === "chat_screenshot" && (
+            <div className={styles.dropHintSub}>
+              Drop multiple screenshots to auto-group for stitching
+            </div>
+          )}
         </div>
         <input
           ref={fileInputRef}

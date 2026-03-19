@@ -6,7 +6,7 @@
 | 2 | [Spaces CRUD](milestone-2.md) | `DONE` | 5/5 |
 | 3 | [File Upload & Storage](milestone-3.md) | `DONE` | 9/9 |
 | 4 | [Call Recording Transcription](milestone-4.md) | `DONE` | 1/1 |
-| 5 | [Screenshot OCR & Chat Reconstruction](milestone-5.md) | `IN PROGRESS` | 0/8 |
-| 6 | [Screenshot Stitching](milestone-6.md) | `PENDING` | 0/6 |
+| 5 | [Screenshot OCR & Chat Reconstruction](milestone-5.md) | `DONE` | 1/1 |
+| 6 | [Screenshot Stitching](milestone-6.md) | `IN PROGRESS` | 0/6 |
 | 7 | [Unified Chat View & Status Management](milestone-7.md) | `PENDING` | 0/6 |
 | 8 | [Search & Polish](milestone-8.md) | `PENDING` | 0/8 |
