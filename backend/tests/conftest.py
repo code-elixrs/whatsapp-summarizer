@@ -19,11 +19,16 @@ from app.models import Base
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     engine = create_async_engine(settings.database_url, echo=False)
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as session:
         yield session
+
+    # Clean up after test
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
     await engine.dispose()
 
