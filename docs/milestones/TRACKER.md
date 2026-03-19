@@ -9,4 +9,4 @@
 | 5 | [Screenshot OCR & Chat Reconstruction](milestone-5.md) | `DONE` | 1/1 |
 | 6 | [Screenshot Stitching](milestone-6.md) | `DONE` | 1/1 |
 | 7 | [Unified Chat View & Status Management](milestone-7.md) | `DONE` | 1/1 |
-| 8 | [Search & Polish](milestone-8.md) | `PENDING` | 0/8 |
+| 8 | [Search & Polish](milestone-8.md) | `DONE` | 1/1 |

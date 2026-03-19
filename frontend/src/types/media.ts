@@ -141,6 +141,26 @@ export interface ChatStreamResponse {
   total_events: number;
 }
 
+// Search types
+export interface SearchResultItem {
+  result_type: "chat_message" | "transcript" | "media_item";
+  item_id: string;
+  space_id: string;
+  space_name: string;
+  content_type: string;
+  title: string | null;
+  file_name: string;
+  snippet: string;
+  item_timestamp: string | null;
+  platform: string | null;
+}
+
+export interface SearchResponse {
+  query: string;
+  results: SearchResultItem[];
+  total: number;
+}
+
 export interface UploadingFile {
   id: string;
   file: File;

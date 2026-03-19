@@ -1,4 +1,4 @@
-import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript, ChatMessagesResponse, ChatMessageUpdate, ChatMessage, ChatStreamResponse } from "../types/media";
+import type { ContentType, MediaItem, MediaItemListResponse, MediaItemUpdate, Transcript, ChatMessagesResponse, ChatMessageUpdate, ChatMessage, ChatStreamResponse, SearchResponse } from "../types/media";
 import { apiFetch } from "./api";
 
 export async function uploadFile(
@@ -149,4 +149,22 @@ export function stitchGroup(groupId: string, autoOcr = true): Promise<{ status: 
 
 export function getChatStream(spaceId: string): Promise<ChatStreamResponse> {
   return apiFetch<ChatStreamResponse>(`/spaces/${spaceId}/chat-stream`);
+}
+
+// Search
+
+export function globalSearch(query: string, limit = 50): Promise<SearchResponse> {
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
+  return apiFetch<SearchResponse>(`/search?${params}`);
+}
+
+export function spaceSearch(
+  spaceId: string,
+  query: string,
+  contentType?: string,
+  limit = 50,
+): Promise<SearchResponse> {
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
+  if (contentType) params.set("content_type", contentType);
+  return apiFetch<SearchResponse>(`/spaces/${spaceId}/search?${params}`);
 }

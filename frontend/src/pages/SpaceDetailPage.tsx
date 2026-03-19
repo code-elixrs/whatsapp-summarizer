@@ -6,9 +6,9 @@ import { TimelineItem } from "../components/spaces/TimelineItem";
 import { UnifiedChatView } from "../components/chat/UnifiedChatView";
 import { StatusGallery } from "../components/spaces/StatusGallery";
 import { getSpace, deleteSpace } from "../lib/spaces";
-import { listItems } from "../lib/media";
+import { listItems, spaceSearch } from "../lib/media";
 import type { Space } from "../types/space";
-import type { ContentType, MediaItem } from "../types/media";
+import type { ContentType, MediaItem, SearchResultItem } from "../types/media";
 import styles from "./SpaceDetailPage.module.css";
 
 type ViewMode = "timeline" | "chat";
@@ -32,6 +32,30 @@ export function SpaceDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [filter, setFilter] = useState<ContentType | "all">("all");
   const [viewMode, setViewMode] = useState<ViewMode>("timeline");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  // Debounced in-space search
+  useEffect(() => {
+    if (!spaceId || searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const contentType = filter === "all" ? undefined : filter;
+        const data = await spaceSearch(spaceId, searchQuery, contentType);
+        setSearchResults(data.results);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [spaceId, searchQuery, filter]);
 
   const fetchData = useCallback(async () => {
     if (!spaceId) return;
@@ -164,23 +188,61 @@ export function SpaceDetailPage() {
                   {f.label}
                 </button>
               ))}
+              <div className={styles.spaceSearch}>
+                <input
+                  type="text"
+                  className={styles.spaceSearchInput}
+                  placeholder="Search in space..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searching && <span className={styles.spaceSearchSpinner} />}
+              </div>
             </div>
 
-            {isStatusFilter && items.length > 0 ? (
-              <StatusGallery items={items} onUpdate={fetchData} />
-            ) : items.length === 0 ? (
-              <div className={styles.emptyTimeline}>
-                <p className={styles.emptyText}>No items yet</p>
-                <p className={styles.emptyHint}>
-                  Upload call recordings, chat screenshots, or status updates
-                </p>
-              </div>
-            ) : (
-              <div className={styles.timeline}>
-                {items.map((item) => (
-                  <TimelineItem key={item.id} item={item} onUpdate={fetchData} />
+            {/* Search results */}
+            {searchQuery.length >= 2 && searchResults.length > 0 && (
+              <div className={styles.searchResults}>
+                <div className={styles.searchResultsHeader}>
+                  {searchResults.length} result{searchResults.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+                </div>
+                {searchResults.map((r, i) => (
+                  <div key={`${r.result_type}-${r.item_id}-${i}`} className={styles.searchResultItem}>
+                    <span className={styles.searchResultType}>
+                      {r.result_type === "chat_message" ? "Chat" : r.result_type === "transcript" ? "Transcript" : "Item"}
+                    </span>
+                    <span className={styles.searchResultSnippet}>{r.snippet}</span>
+                  </div>
                 ))}
               </div>
+            )}
+
+            {searchQuery.length >= 2 && searchResults.length === 0 && !searching && (
+              <div className={styles.searchNoResults}>
+                No results for &ldquo;{searchQuery}&rdquo;
+              </div>
+            )}
+
+            {/* Normal content (hidden when searching) */}
+            {searchQuery.length < 2 && (
+              <>
+                {isStatusFilter && items.length > 0 ? (
+                  <StatusGallery items={items} onUpdate={fetchData} />
+                ) : items.length === 0 ? (
+                  <div className={styles.emptyTimeline}>
+                    <p className={styles.emptyText}>No items yet</p>
+                    <p className={styles.emptyHint}>
+                      Upload call recordings, chat screenshots, or status updates
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.timeline}>
+                    {items.map((item) => (
+                      <TimelineItem key={item.id} item={item} onUpdate={fetchData} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
