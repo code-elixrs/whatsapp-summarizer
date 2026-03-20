@@ -19,4 +19,9 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
 )
 
-celery_app.autodiscover_tasks(["app.tasks"])
+celery_app.autodiscover_tasks(["app.tasks"], related_name=None, force=True)
+
+# Explicitly import task modules so Celery registers them
+import app.tasks.transcribe  # noqa: F401, E402
+import app.tasks.ocr  # noqa: F401, E402
+import app.tasks.stitch  # noqa: F401, E402
